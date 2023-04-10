@@ -1,0 +1,17 @@
+{
+  "name": "rutastic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "js/app.js",
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {
+    "@aws-amplify/core": "^3.3.13",
+    "@aws-amplify/auth": "^3.3.13"
+  },
+  "devDependencies": {
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0"
+  }
+}

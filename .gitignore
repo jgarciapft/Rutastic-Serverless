@@ -1,0 +1,12 @@
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+
+
+# User defined
+res
+node_modules
+dist
+.aws-sam
