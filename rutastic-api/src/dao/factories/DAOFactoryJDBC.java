@@ -48,7 +48,7 @@ public class DAOFactoryJDBC implements DAOFactory<DAOImplJDBC> {
     public <U, V extends DAO<U>> V forModel(Class<U> modelClass) {
         DAOImplJDBC dao = jdbcDAOCollection.getOrDefault(modelClass, null);
 
-        // Return the requested DAO casted to the DAO sub-interface that was requested, or null if not found
+        // Return the requested DAO cast to the DAO sub-interface that was requested, or null if not found
 
         if (dao != null)
             return (V) dao;
