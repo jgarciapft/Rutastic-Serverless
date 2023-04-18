@@ -1,0 +1,57 @@
+<div class="container my-5 py-5">
+    <div class="row d-xl-flex justify-content-xl-center">
+        <div class="col-5 login-clean">
+            <form id="form-login" class="needs-validation" data-ng-submit="loginVM.functions.submitLoginForm()"
+                  method="post">
+                <h1 class="text-center pt-5 pb-3"><span class="rutastic-brand">Rutastic</span></h1>
+                <div class="d-xl-flex justify-content-xl-center mb-5">
+                    <img alt="Rutastic logo"
+                         class="align-items-xl-center"
+                         src="img/Rutastic-logo-150px.png">
+                </div>
+                <div class="alert alert-danger mb-5 mx-5" role="alert" data-ng-if="loginVM.errorMessage.length > 0">
+                    <span class="font-weight-bold">{{loginVM.errorMessage}}</span><br/>
+                    <a data-ng-href="#!/Verificar/{{loginVM.username}}" data-ng-if="loginVM.errorUnconfirmedUser === 1">
+                        Verificar cuenta
+                    </a>
+                </div>
+                <div class="form-group px-5 mb-n1">
+                    <input aria-label="Nombre de usuario"
+                           class="form-control"
+                           data-ng-model="loginVM.username"
+                           id="usuario-in"
+                           name="usuario"
+                           placeholder="Nombre de usuario"
+                           type="text"
+                           required>
+                    <div class="invalid-feedback">
+                        Introduzca un nombre de usuario
+                    </div>
+                </div>
+                <div class="form-group px-5 mt-1">
+                    <input aria-label="Contraseña"
+                           class="form-control"
+                           data-ng-model="loginVM.password"
+                           id="password-in"
+                           name="password"
+                           placeholder="Contraseña"
+                           type="password"
+                           required>
+                    <div class="invalid-feedback">
+                        Proporcione una contraseña
+                    </div>
+                </div>
+                <div class="form-group px-5">
+                    <button class="btn btn-primary btn-block font-weight-bold" type="submit">INICIAR SESIÓN
+                    </button>
+                </div>
+                <p class="text-center mt-5">¿Aún no eres miembro?
+                    <a class="font-weight-bold" href="#!/Registro">Regístrate</a>
+                </p>
+                <a class="d-block text-center font-weight-bold pb-5" href="#!/">
+                    Volver al inicio
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
