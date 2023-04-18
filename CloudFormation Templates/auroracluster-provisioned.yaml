@@ -1,0 +1,103 @@
+#file: noinspection YamlFormatViolation
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: El ID de la VPC en la que alojar el clúster Aurora (RutasticDB)
+  VPCSubnetsIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Listado de las subredes en la VPC en la que se aloja el clúster Aurora (RutasticDB)
+  DBDevEndpointSourceCIDR:
+    Type: String
+    Description: CIDR de la red desde la que se permitirá el acceso al endpoint del desarrollador
+Resources:
+  AuroraDBCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      AvailabilityZones:
+        - !Sub ${AWS::Region}a
+        - !Sub ${AWS::Region}b
+        - !Sub ${AWS::Region}c
+      DatabaseName: rutastic
+      DBClusterIdentifier: rutasticdb-cluster
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      Engine: aurora-mysql
+      EngineVersion: 8.0.mysql_aurora.3.02.0
+      MasterUsername: master
+      ManageMasterUserPassword: true
+      MasterUserSecret:
+        KmsKeyId: !Ref DBSecretEncryptionKey
+      NetworkType: IPV4
+      Port: 3306
+      StorageEncrypted: true
+      VpcSecurityGroupIds:
+        - !Ref DBSecurityGroupByEC2SG
+
+  DBSecretEncryptionKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: RutasticDB credentials secret encryption key
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: !Ref AWS::StackName
+        Statement:
+          - Sid: Allow administration of the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'
+            Action:
+              - "kms:*"
+            Resource: "*"
+
+  DBInstance1:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AvailabilityZone: !Sub ${AWS::Region}a
+      DBClusterIdentifier: !Ref AuroraDBCluster
+      DBInstanceClass: db.t3.medium
+      DBInstanceIdentifier: rutasticdb-instance-1
+      Engine: aurora-mysql
+      PubliclyAccessible: true
+      PromotionTier: 0
+
+  DBInstance2:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AvailabilityZone: !Sub ${AWS::Region}b
+      DBClusterIdentifier: !Ref AuroraDBCluster
+      DBInstanceClass: db.t3.medium
+      DBInstanceIdentifier: rutasticdb-instance-2
+      Engine: aurora-mysql
+      PubliclyAccessible: true
+      PromotionTier: 1
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: rutasticdb-subnet-group
+      DBSubnetGroupDescription: Created from CloudFormation template
+      SubnetIds: !Ref VPCSubnetsIds
+
+  DBSecurityGroupByEC2SG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for RutasticDB resource
+      GroupName: RutasticDB-AuroraCluster-SG
+      VpcId: !Ref VPCId
+      SecurityGroupIngress:
+        - SourceSecurityGroupName: RutasticDB-AuroraCluster-SG-wip
+          IpProtocol: -1
+        - CidrIp: !Ref DBDevEndpointSourceCIDR
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+Outputs:
+  AuroraClusterSecretArn:
+    Value: !GetAtt AuroraDBCluster.MasterUserSecret.SecretArn
+  AuroraClusterEndpoint:
+    Value: !GetAtt AuroraDBCluster.Endpoint.Address
+  AuroraClusterReadEndpoint:
+    Value: !GetAtt AuroraDBCluster.ReadEndpoint.Address
