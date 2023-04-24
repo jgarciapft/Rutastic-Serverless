@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: Rutastic Serverless WebApp
+Description: Rutastic WebApp with provisioned capacity (testing only)
 Parameters:
   VPCId:
     Type: AWS::EC2::VPC::Id
@@ -12,7 +12,7 @@ Parameters:
     Type: String
     Description: CIDR de la red desde la que se permitirá el acceso al endpoint del desarrollador
 Resources:
-  AuroraDBServerlessCluster:
+  AuroraDBCluster:
     Type: AWS::RDS::DBCluster
     Properties:
       AvailabilityZones:
@@ -30,9 +30,6 @@ Resources:
         KmsKeyId: !Ref DBSecretEncryptionKey
       NetworkType: IPV4
       Port: 3306
-      ServerlessV2ScalingConfiguration:
-        MinCapacity: 0.5
-        MaxCapacity: 3
       StorageEncrypted: true
       VpcSecurityGroupIds:
         - !Ref DBSecurityGroupByEC2SG
@@ -53,23 +50,23 @@ Resources:
               - "kms:*"
             Resource: "*"
 
-  DBServerlessInstance1:
+  DBInstance1:
     Type: AWS::RDS::DBInstance
     Properties:
       AvailabilityZone: !Sub ${AWS::Region}a
-      DBClusterIdentifier: !Ref AuroraDBServerlessCluster
-      DBInstanceClass: db.serverless
+      DBClusterIdentifier: !Ref AuroraDBCluster
+      DBInstanceClass: db.t3.medium
       DBInstanceIdentifier: rutasticdb-instance-1
       Engine: aurora-mysql
       PubliclyAccessible: true
       PromotionTier: 0
 
-  DBServerlessInstance2:
+  DBInstance2:
     Type: AWS::RDS::DBInstance
     Properties:
       AvailabilityZone: !Sub ${AWS::Region}b
-      DBClusterIdentifier: !Ref AuroraDBServerlessCluster
-      DBInstanceClass: db.serverless
+      DBClusterIdentifier: !Ref AuroraDBCluster
+      DBInstanceClass: db.t3.medium
       DBInstanceIdentifier: rutasticdb-instance-2
       Engine: aurora-mysql
       PubliclyAccessible: true
@@ -100,9 +97,8 @@ Resources:
           IpProtocol: -1
 Outputs:
   AuroraClusterSecretArn:
-    Value: !GetAtt AuroraDBServerlessCluster.MasterUserSecret.SecretArn
+    Value: !GetAtt AuroraDBCluster.MasterUserSecret.SecretArn
   AuroraClusterEndpoint:
-    Value: !GetAtt AuroraDBServerlessCluster.Endpoint.Address
+    Value: !GetAtt AuroraDBCluster.Endpoint.Address
   AuroraClusterReadEndpoint:
-    Value: !GetAtt AuroraDBServerlessCluster.ReadEndpoint.Address
-
+    Value: !GetAtt AuroraDBCluster.ReadEndpoint.Address
