@@ -11,6 +11,31 @@ Parameters:
   DBDevEndpointSourceCIDR:
     Type: String
     Description: CIDR de la red desde la que se permitirá el acceso al endpoint del desarrollador
+  RutasticAPIStageName:
+    Type: String
+    Description: Nombre de la etapa en la que se desplegará RutasticAPI
+  LambdaExecutionRoleArn:
+    Type: String
+    Description: ARN del rol asociado a las funciones Lambda
+Globals:
+  Function:
+    Runtime: java11
+    MemorySize: 256
+    EphemeralStorage:
+      Size: 512
+    Timeout: 15
+    Environment:
+      Variables:
+        DB_SCHEMA: rutastic
+        DB_USER: !Sub '{{resolve:secretsmanager:${AuroraDBServerlessCluster.MasterUserSecret.SecretArn}:SecretString:username}}'
+        DB_USER_PWD: !Sub '{{resolve:secretsmanager:${AuroraDBServerlessCluster.MasterUserSecret.SecretArn}:SecretString:password}}'
+        READ_ENDPOINT: !GetAtt AuroraDBServerlessCluster.ReadEndpoint.Address
+        WRITE_ENDPOINT: !GetAtt AuroraDBServerlessCluster.Endpoint.Address
+        PORT: !GetAtt AuroraDBServerlessCluster.Endpoint.Port
+    VpcConfig:
+      SubnetIds: !Ref VPCId
+      SecurityGroupIds:
+        - !Ref DBSecurityGroupByEC2SG
 Resources:
   AuroraDBServerlessCluster:
     Type: AWS::RDS::DBCluster
@@ -98,6 +123,64 @@ Resources:
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           IpProtocol: -1
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: RutasticUserPool
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      UsernameConfiguration:
+        CaseSensitive: false
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AutoVerifiedAttributes:
+        - email
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_CODE
+        EmailSubject: '[Rutastic] Tu código de verificación'
+        EmailMessage: 'Tu código de verificación para Rutastic es {####}'
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      MfaConfiguration: 'OFF'
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: Rutastic WebappSPA Client
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ReadAttributes:
+        - email
+        - email_verified
+      WriteAttributes:
+        - email
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+      PreventUserExistenceErrors: ENABLED
+
 Outputs:
   AuroraClusterSecretArn:
     Value: !GetAtt AuroraDBServerlessCluster.MasterUserSecret.SecretArn
@@ -105,4 +188,9 @@ Outputs:
     Value: !GetAtt AuroraDBServerlessCluster.Endpoint.Address
   AuroraClusterReadEndpoint:
     Value: !GetAtt AuroraDBServerlessCluster.ReadEndpoint.Address
-
+  CognitoUserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref CognitoUserPool
+  CognitoUserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref CognitoUserPoolClient

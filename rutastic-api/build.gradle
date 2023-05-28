@@ -12,14 +12,6 @@ repositories {
     mavenCentral()
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src']
-        }
-    }
-}
-
 dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'

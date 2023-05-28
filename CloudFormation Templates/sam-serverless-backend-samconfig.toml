@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "ServerlessBackendTest"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-d9t24k9eyhtf"
+s3_prefix = "ServerlessBackendTest"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "RutasticAPIStageName=\"default\" LambdaExecutionRoleArn=\"arn:aws:iam::260124700194:role/LabRole\""
+image_repositories = []

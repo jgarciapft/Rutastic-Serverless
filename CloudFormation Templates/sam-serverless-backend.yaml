@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  RutasticAPIStageName:
+    Type: String
+    Description: Nombre de la etapa en la que se desplegará RutasticAPI
+  LambdaExecutionRoleArn:
+    Type: String
+    Description: ARN del rol asociado a las funciones Lambda
+Globals:
+  Function:
+    Runtime: java11
+    Architectures:
+      - x86_64
+    MemorySize: 256
+    EphemeralStorage:
+      Size: 512
+    Timeout: 15
+    Environment:
+      Variables:
+        DB_SCHEMA: rutastic
+        DB_USER: root
+        DB_USER_PWD: adminadmin
+        READ_ENDPOINT: 0.tcp.eu.ngrok.io
+        WRITE_ENDPOINT: 0.tcp.eu.ngrok.io
+        PORT: 13912
+    CodeUri: rutastic-api
+
+Resources:
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: RutasticUserPool
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      UsernameConfiguration:
+        CaseSensitive: false
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AutoVerifiedAttributes:
+        - email
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_CODE
+        EmailSubject: '[Rutastic] Tu código de verificación'
+        EmailMessage: 'Tu código de verificación para Rutastic es {####}'
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      MfaConfiguration: 'OFF'
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: Rutastic WebappSPA Client
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ReadAttributes:
+        - email
+        - email_verified
+      WriteAttributes:
+        - email
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+      PreventUserExistenceErrors: ENABLED
+
+  ApiGatewayRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: RutasticAPI
+      StageName: !Ref RutasticAPIStageName
+      EndpointConfiguration:
+        Type: REGIONAL
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
+            Identity:
+              Header: Auth
+        DefaultAuthorizer: CognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+#      Cors:
+#        AllowHeaders: "'Content-Type,Authorization,Auth,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+#        AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+#        AllowOrigin: "'*'"
+
+  LambdaCategoriasRutaGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-categoriasruta-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.CategoriasRutaGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /categoriasruta
+            Auth:
+              Authorizer: NONE
+
+Outputs:
+  CognitoUserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref CognitoUserPool
+  CognitoUserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref CognitoUserPoolClient
+  RutasticAPIEndpoint:
+    Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${RutasticAPIStageName}"
