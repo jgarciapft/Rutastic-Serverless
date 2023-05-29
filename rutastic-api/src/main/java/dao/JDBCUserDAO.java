@@ -25,7 +25,8 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
 
     private static final Logger logger = Logger.getLogger(JDBCUserDAO.class.getName());
     private boolean dependenciesConfigured;
-    private Connection connection;
+    private Connection readOnlyConnection;
+    private Connection writeConnection;
 
     /**
      * {@inheritDoc}
@@ -41,7 +42,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
         ModelMapper<User> userModelMapper = ModelMapperFactory.get().forModel(User.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM users");
 
             while (rs.next()) {
@@ -82,7 +83,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
         ModelMapper<User> userModelMapper = ModelMapperFactory.get().forModel(User.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery(String.format("SELECT * FROM users WHERE username = '%s'", username));
 
             if (rs.next()) {
@@ -121,7 +122,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
         if (!dependenciesConfigured()) return new long[]{SQLERROR};
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             // It can only register regular users, the default value for the role column
             st.executeUpdate(String.format("INSERT INTO users(username) VALUES ('%s')",
                     instance.getUsername()));
@@ -130,7 +131,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -140,7 +141,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
 
         if (isAtomic) {
             try {
-                connection.commit();
+                writeConnection.commit();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -192,10 +193,10 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
         boolean deletionSuccessful = false;
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate("DELETE FROM users WHERE id = " + id[0]);
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             deletionSuccessful = true;
             st.close();
 
@@ -204,7 +205,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -221,10 +222,10 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
         boolean deletionSuccessful = false;
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate("DELETE FROM users WHERE username = '" + username + "'");
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             deletionSuccessful = true;
             st.close();
 
@@ -233,7 +234,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -255,7 +256,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
         // Query the view of top users by routes at the top monthly chart
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM top_users_by_top_monthly_routes");
 
             // Parse each row into a list of user stats which links an username to the number of top monthly routes
@@ -296,7 +297,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
         // Query the view of top users by average kudo ratings of their routes
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM top_users_by_top_avg_kudos");
 
             // Parse each row into a list of user stats which links an username to the average kudo rating
@@ -345,7 +346,12 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
      * {@inheritDoc}
      */
     @Override
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setReadOnlyConnection(Connection connection) {
+        this.readOnlyConnection = connection;
+    }
+
+    @Override
+    public void setWriteConnection(Connection connection) {
+        this.writeConnection = connection;
     }
 }

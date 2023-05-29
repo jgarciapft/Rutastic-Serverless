@@ -27,7 +27,8 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
 
     private static final Logger logger = Logger.getLogger(JDBCKudoEntryDAO.class.getName());
     private boolean dependenciesConfigured;
-    private Connection connection;
+    private Connection readOnlyConnection;
+    private Connection writeConnection;
 
     public JDBCKudoEntryDAO() {
         dependenciesConfigured = false;
@@ -47,7 +48,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
         ModelMapper<KudoEntry> kEntryModelMapper = ModelMapperFactory.get().forModel(KudoEntry.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routekudosregistry_unixtime");
 
             while (rs.next()) {
@@ -87,7 +88,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
         ModelMapper<KudoEntry> kEntryModelMapper = ModelMapperFactory.get().forModel(KudoEntry.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routekudosregistry_unixtime WHERE user = '" + username + "'");
 
             while (rs.next()) {
@@ -128,7 +129,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
         ModelMapper<KudoEntry> kEntryModelMapper = ModelMapperFactory.get().forModel(KudoEntry.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routekudosregistry_unixtime WHERE route = " + routeId);
 
             while (rs.next()) {
@@ -170,7 +171,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
         ModelMapper<KudoEntry> kEntryModelMapper = ModelMapperFactory.get().forModel(KudoEntry.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery(String.format("SELECT * FROM routekudosregistry_unixtime " +
                     "WHERE user = '%s' AND route = %d", username, routeId));
 
@@ -218,13 +219,13 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
         if (!dependenciesConfigured()) return new Object[]{SQLERROR};
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate(String.format("INSERT INTO routekudosregistry(user, route, modifier) VALUES ('%s', %d, %d)",
                     instance.getUser(),
                     instance.getRoute(),
                     instance.getModifier()));
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             st.close();
 
             logger.info(String.format("[NEW KUDO ENTRY CREATED] user: %s | route: %s | modifier: %d",
@@ -235,7 +236,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -266,13 +267,13 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
         boolean updateSuccessful = false;
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate(String.format("UPDATE routekudosregistry SET modifier = %d WHERE user = '%s' AND route = %d",
                     instance.getModifier(),
                     instance.getUser(),
                     instance.getRoute()));
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             updateSuccessful = true;
             st.close();
 
@@ -284,7 +285,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -317,10 +318,10 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
         boolean deletionSuccessful = false;
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate(String.format("DELETE FROM routekudosregistry WHERE user = '%s' AND route = %d", username, routeId));
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             deletionSuccessful = true;
             st.close();
 
@@ -329,7 +330,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -374,7 +375,12 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
      * {@inheritDoc}
      */
     @Override
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setReadOnlyConnection(Connection connection) {
+        this.readOnlyConnection = connection;
+    }
+
+    @Override
+    public void setWriteConnection(Connection connection) {
+        this.writeConnection = connection;
     }
 }

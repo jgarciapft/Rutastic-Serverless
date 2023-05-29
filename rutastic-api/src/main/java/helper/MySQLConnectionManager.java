@@ -2,6 +2,7 @@ package helper;
 
 import dao.factories.DAOAbstractFactory;
 import dao.factories.DAOFactoryJDBC;
+import dao.implementations.DAODependencyConfigurator;
 import dao.implementations.DAOImplJDBC;
 
 import java.sql.Connection;
@@ -13,11 +14,13 @@ public class MySQLConnectionManager {
 
     private static MySQLConnectionManager sInstance = null;
 
-    private String dbURL;
+    private String readOnlyDBUrl;
+    private String writeDBUrl;
     private String user;
     private String password;
 
-    private Connection connection;
+    private Connection readOnlyConnection;
+    private Connection writeConnection;
 
     private MySQLConnectionManager() {
     }
@@ -26,17 +29,19 @@ public class MySQLConnectionManager {
      * Set up this manager with MySQL DB instance parameters and attempt to open a connection to the database through
      * MySQL JDBC Driver
      *
-     * @param host     Hostname of the machine that hosts the MySQL instance
-     * @param port     TCP port where the instance accepts incoming connections
-     * @param user     DB user
-     * @param password Password for the DB user
-     * @param schema   which schema (DB) to use
+     * @param readOnlyEndpoint Read-only endpoint of the MySQL instance
+     * @param writeEndpoint    Writeable endpoint of the MySQL instance
+     * @param port             TCP port where the instance accepts incoming connections
+     * @param user             DB user
+     * @param password         Password for the DB user
+     * @param schema           which schema (DB) to use
      */
-    public void setUpAndConnect(String host, int port, String user, String password, String schema) {
+    public void setUpAndConnect(String readOnlyEndpoint, String writeEndpoint, int port, String user, String password, String schema) {
 
         // Update attributes
 
-        this.dbURL = "jdbc:mysql://" + host + ":" + port + "/" + schema;
+        this.readOnlyDBUrl = String.format("jdbc:mysql://%s:%d/%s", readOnlyEndpoint, port, schema);
+        this.writeDBUrl = String.format("jdbc:mysql://%s:%d/%s", writeEndpoint, port, schema);
         this.user = user;
         this.password = password;
 
@@ -44,56 +49,54 @@ public class MySQLConnectionManager {
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            reconnect();
+            connect();
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            System.err.println("Error loading JDBC Driver: " + e.getMessage());
         }
     }
 
-    /**
-     * Reopens the current connection if it's closed. If it's still opened, it closes it and reopens it again
-     */
-    public void reconnect() {
-
-        // Create DB connection, configure it and store it as an attribute of the servlet context
-
+    private void connect() {
         try {
+            Connection readOnlyConnection = DriverManager.getConnection(this.readOnlyDBUrl, this.user, this.password);
+            Connection writeConnection = DriverManager.getConnection(this.writeDBUrl, this.user, this.password);
 
-            // If the current connection isn't closed, close it before opening a new one
+            if (readOnlyConnection != null && writeConnection != null) {
 
-            if (connection != null && !connection.isClosed())
-                connection.close();
+                readOnlyConnection.setReadOnly(true);
+                readOnlyConnection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED); // Most relaxed isolation level
 
-            Connection tempConn = DriverManager.getConnection(dbURL, this.user, this.password);
-
-            // Check that the connection could be established correctly
-
-            if (tempConn != null) {
-
-                // Set options
-
-                tempConn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED); // Most relaxed isolation level
-                tempConn.setAutoCommit(false); // Enforce explicit commit-rollback calls
+                writeConnection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED); // Most relaxed isolation level
+                writeConnection.setAutoCommit(false); // Enforce explicit commit-rollback calls
 
                 // Store the connection
 
-                connection = tempConn;
+                this.readOnlyConnection = readOnlyConnection;
+                this.writeConnection = writeConnection;
 
                 // Register DAOFactories and configure its dependencies
 
-                DAOAbstractFactory.get().registerDAOFactory(new DAOFactoryJDBC(), (dao, dependencies) -> {
+                DAODependencyConfigurator<DAOImplJDBC> jdbcDaoDependencyConfigurator = (dao, dependencies) -> {
                     HashMap<String, Object> dependenciesMap = new HashMap<>();
-                    dependenciesMap.put(DAOImplJDBC.CONNECTION_IDENTIFIER, connection);
+
+                    dependenciesMap.put(DAOImplJDBC.READONLY_CONNECTION_IDENTIFIER, readOnlyConnection);
+                    dependenciesMap.put(DAOImplJDBC.WRITE_CONNECTION_IDENTIFIER, writeConnection);
+
                     dao.configureDependencies(dependenciesMap);
-                });
+                };
+
+                DAOAbstractFactory.get().registerDAOFactory(new DAOFactoryJDBC(), jdbcDaoDependencyConfigurator);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error connecting to AuroraDB MySQL Cluster: " + e.getMessage());
         }
     }
 
-    public Connection getConnection() {
-        return connection;
+    public Connection getReadOnlyConnection() {
+        return readOnlyConnection;
+    }
+
+    public Connection getWriteConnection() {
+        return writeConnection;
     }
 
     public static MySQLConnectionManager getInstance() {
@@ -102,5 +105,4 @@ public class MySQLConnectionManager {
 
         return sInstance;
     }
-
 }

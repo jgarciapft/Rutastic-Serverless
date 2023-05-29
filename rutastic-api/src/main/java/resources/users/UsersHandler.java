@@ -30,7 +30,7 @@ public class UsersHandler implements RequestHandler<APIGatewayProxyRequestEvent,
 
     static {
         // On cold boot set up and create a db connection
-        jdbcManager.setUpAndConnect(System.getenv("PROXY_ENDPOINT"),
+        jdbcManager.setUpAndConnect(System.getenv("PROXY_ENDPOINT"),System.getenv("PROXY_ENDPOINT"),
                 Integer.parseInt(System.getenv("PORT")),
                 System.getenv("DB_USER"),
                 System.getenv("DB_USER_PWD"),

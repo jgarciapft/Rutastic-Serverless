@@ -34,7 +34,8 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
 
     private static final Logger logger = Logger.getLogger(JDBCRouteDAO.class.getName());
     private boolean dependenciesConfigured;
-    private Connection connection;
+    private Connection readOnlyConnection;
+    private Connection writeConnection;
 
     /**
      * {@inheritDoc}
@@ -50,7 +51,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
         ModelMapper<Route> routeModelMapper = ModelMapperFactory.get().forModel(Route.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routes_expandedinfo");
 
             while (rs.next()) {
@@ -92,7 +93,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
         ModelMapper<Route> routeModelMapper = ModelMapperFactory.get().forModel(Route.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routes_expandedinfo WHERE id = " + id[0]);
 
             if (rs.next()) {
@@ -151,14 +152,14 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
             return SQLERROR;
         };
 
-        lastId = queryLatestId.apply(connection);
+        lastId = queryLatestId.apply(readOnlyConnection);
 
         if (lastId == SQLERROR) return new long[]{SQLERROR};
 
         // Insert new route into the routes table
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate(String.format("INSERT INTO routes(created_by_user, title, description, distance, duration, elevation, skill_level)" +
                             " VALUES ('%s', '%s', '%s', %d, %d, %d, '%s')",
                     instance.getCreatedByUser(),
@@ -173,12 +174,12 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
             throwables.printStackTrace();
         }
 
-        newId[0] = queryLatestId.apply(connection);
+        newId[0] = queryLatestId.apply(readOnlyConnection);
 
         if (newId[0] == SQLERROR || newId[0] <= lastId) {
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
@@ -198,9 +199,9 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
 
         try {
             if (categoriesMappingDAO.addInBulk(routeCategoriesMappings, false))
-                connection.commit();
+                writeConnection.commit();
             else
-                connection.rollback();
+                writeConnection.rollback();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -236,7 +237,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
         // Update first the route info that is stored in the routes table
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate(String.format("UPDATE routes " +
                             "SET title = '%s', description = '%s', distance = %d, duration = %d, elevation = %d, skill_level = '%s', blocked = %d " +
                             "WHERE id = %d",
@@ -263,9 +264,9 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
 
             try {
                 if (updateSuccessful)
-                    connection.commit();
+                    writeConnection.commit();
                 else
-                    connection.rollback();
+                    writeConnection.rollback();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -310,10 +311,10 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
         boolean deletionSuccessful = false;
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate("DELETE FROM routes WHERE id = " + id[0]);
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             deletionSuccessful = true;
             st.close();
 
@@ -322,7 +323,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -345,7 +346,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
         // Query the view of top monthly routes by kudos given this month
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM top_monthly_routes_by_kudos");
 
             while (rs.next()) {
@@ -385,7 +386,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
         // Query the view of top weekly routes by kudos given this month
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM top_weekly_routes_by_kudos");
 
             while (rs.next()) {
@@ -427,7 +428,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
 
                 // Execute the query with the filter
 
-                Statement st = connection.createStatement();
+                Statement st = readOnlyConnection.createStatement();
                 ResultSet rs = st.executeQuery(sqlRouteFilter.consume());
 
                 // Parse filtered routes from the executed query
@@ -523,7 +524,12 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
      * {@inheritDoc}
      */
     @Override
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setReadOnlyConnection(Connection connection) {
+        this.readOnlyConnection = connection;
+    }
+
+    @Override
+    public void setWriteConnection(Connection connection) {
+        this.writeConnection = connection;
     }
 }

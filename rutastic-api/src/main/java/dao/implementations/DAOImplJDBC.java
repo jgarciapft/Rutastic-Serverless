@@ -1,6 +1,7 @@
 package dao.implementations;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -10,31 +11,38 @@ import java.util.Map;
  */
 public interface DAOImplJDBC extends DAOImplementation {
 
-    String CONNECTION_IDENTIFIER = "connection";
+    String READONLY_CONNECTION_IDENTIFIER = "readonly-connection";
+    String WRITE_CONNECTION_IDENTIFIER = "write-connection";
 
     /**
      * Configure dependencies for JDBC DAO classes. Essentially set the connection to the database
      *
-     * @param dependencies Collection of the DAO dependencies identified by a string. It should contain the connection
-     *                     to the database identified by the string 'connection'
+     * @param dependencies Collection of the DAO dependencies identified by a string
      */
     @Override
     default void configureDependencies(Map<String, Object> dependencies) {
-        Object connection = dependencies.getOrDefault(CONNECTION_IDENTIFIER, null);
+        Object readOnlyConnection = dependencies.getOrDefault(READONLY_CONNECTION_IDENTIFIER, null);
+        Object writeConnection = dependencies.getOrDefault(WRITE_CONNECTION_IDENTIFIER, null);
+        boolean dependenciesConfigured = true;
 
-        if (connection instanceof Connection) {
-            setConnection((Connection) connection);
-            setDependenciesConfigured(true);
-        } else {
+        try {
+            if (readOnlyConnection instanceof Connection && ((Connection) readOnlyConnection).isValid(1))
+                setReadOnlyConnection((Connection) readOnlyConnection);
+            else dependenciesConfigured = false;
+
+            if (writeConnection instanceof Connection && ((Connection) writeConnection).isValid(1))
+                setWriteConnection((Connection) writeConnection);
+            else dependenciesConfigured = false;
+
+            setDependenciesConfigured(dependenciesConfigured);
+        } catch (SQLException e) {
+            System.err.println("Error while configuring dependencies for " + this.getClass().getSimpleName() + ": " + e.getMessage());
             setDependenciesConfigured(false);
         }
     }
 
-    /**
-     * Set the connection to the database
-     *
-     * @param connection Connection to the database
-     */
-    void setConnection(Connection connection);
+    void setReadOnlyConnection(Connection connection);
+
+    void setWriteConnection(Connection connection);
 
 }

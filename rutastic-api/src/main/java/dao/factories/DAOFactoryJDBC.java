@@ -25,6 +25,7 @@ public class DAOFactoryJDBC implements DAOFactory<DAOImplJDBC> {
         // Instantiate and store each uninitialized DAO instance
 
         Map<Class<?>, DAOImplJDBC> modifiableFactory = new HashMap<>();
+
         JDBCUserDAO jdbcUserDAO = new JDBCUserDAO();
         JDBCRouteDAO jdbcRouteDAO = new JDBCRouteDAO();
         JDBCRouteCategoryDAO jdbcRouteCategoryDAO = new JDBCRouteCategoryDAO();
@@ -60,10 +61,10 @@ public class DAOFactoryJDBC implements DAOFactory<DAOImplJDBC> {
      * {@inheritDoc}
      */
     @Override
-    public void configureAllDAODependencies(Object... additionalDependencies) {
+    public void configureAllDAODependencies(Object... dependencies) {
         if (dependencyConfigurator != null) {
             for (DAOImplJDBC dao : jdbcDAOCollection.values())
-                dependencyConfigurator.dependenciesConfigurationStrategy(dao, additionalDependencies);
+                dependencyConfigurator.dependenciesConfigurationStrategy(dao, dependencies);
         }
     }
 

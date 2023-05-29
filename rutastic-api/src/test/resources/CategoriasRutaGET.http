@@ -1,0 +1,4 @@
+GET https://{{apiEndpoint}}/{{apiStage}}/categoriasruta
+Accept: application/json
+
+###

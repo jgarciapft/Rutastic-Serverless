@@ -26,7 +26,8 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
 
     private static final Logger logger = Logger.getLogger(JDBCRouteToCategoriesMappingDAO.class.getName());
     private boolean dependenciesConfigured;
-    private Connection connection;
+    private Connection readOnlyConnection;
+    private Connection writeConnection;
 
     /**
      * {@inheritDoc}
@@ -43,7 +44,7 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
                 ModelMapperFactory.get().forModel(RouteToCategoriesMapping.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routetocategoriesmapping");
 
             while (rs.next()) {
@@ -81,7 +82,7 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
                 ModelMapperFactory.get().forModel(RouteToCategoriesMapping.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routetocategoriesmapping WHERE route = " + routeId);
 
             while (rs.next()) {
@@ -119,7 +120,7 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
                 ModelMapperFactory.get().forModel(RouteToCategoriesMapping.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routetocategoriesmapping WHERE category = " + categoryId);
 
             while (rs.next()) {
@@ -173,7 +174,7 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
                 ModelMapperFactory.get().forModel(RouteToCategoriesMapping.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery(String.format("SELECT * FROM routetocategoriesmapping " +
                     "WHERE route = %d AND category = %d", id[0], id[1]));
 
@@ -213,12 +214,12 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
         if (!dependenciesConfigured()) return new long[]{SQLERROR};
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate(String.format("INSERT INTO routetocategoriesmapping(route, category) VALUES (%d, %d)",
                     instance.getRoute(),
                     instance.getCategory()));
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             st.close();
 
             logger.info(String.format("[NEW ROUTE CATEGORY MAPPING CREATED] route: %d | category: %d",
@@ -228,7 +229,7 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -262,10 +263,10 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
         if (isAtomic) {
             try {
                 if (success) {
-                    connection.commit();
+                    writeConnection.commit();
                 } else {
                     logger.warning("[ERROR IN ROUTE CATEGORY MAPPING BULK STORING]");
-                    connection.rollback();
+                    writeConnection.rollback();
                 }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -321,11 +322,11 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
         boolean deletionSuccessful = false;
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate(String.format("DELETE FROM routetocategoriesmapping WHERE route = %d AND category = %d",
                     id[0], id[1]));
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             deletionSuccessful = true;
             st.close();
 
@@ -334,7 +335,7 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -366,10 +367,10 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
         if (isAtomic) {
             try {
                 if (success) {
-                    connection.commit();
+                    writeConnection.commit();
                 } else {
                     logger.warning("[ERROR IN ROUTE CATEGORY MAPPING BULK DELELTION]");
-                    connection.rollback();
+                    writeConnection.rollback();
                 }
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -399,7 +400,12 @@ public class JDBCRouteToCategoriesMappingDAO implements RouteToCategoriesMapping
      * {@inheritDoc}
      */
     @Override
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setReadOnlyConnection(Connection connection) {
+        this.readOnlyConnection = connection;
+    }
+
+    @Override
+    public void setWriteConnection(Connection connection) {
+        this.writeConnection = connection;
     }
 }

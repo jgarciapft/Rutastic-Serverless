@@ -25,7 +25,8 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
 
     private static final Logger logger = Logger.getLogger(JDBCRouteCategoryDAO.class.getName());
     private boolean dependenciesConfigured;
-    private Connection connection;
+    private Connection readOnlyConnection;
+    private Connection writeConnection;
 
     /**
      * {@inheritDoc}
@@ -41,7 +42,7 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
         ModelMapper<RouteCategory> routeCategoryModelMapper = ModelMapperFactory.get().forModel(RouteCategory.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routecategories");
 
             while (rs.next()) {
@@ -80,7 +81,7 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
         ModelMapper<RouteCategory> routeCategoryModelMapper = ModelMapperFactory.get().forModel(RouteCategory.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM routecategories WHERE id = " + id[0]);
 
             if (rs.next()) {
@@ -112,7 +113,7 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
         ModelMapper<RouteCategory> routeCategoryModelMapper = ModelMapperFactory.get().forModel(RouteCategory.class);
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = readOnlyConnection.createStatement();
             ResultSet rs = st.executeQuery(String.format("SELECT * FROM routecategories WHERE name = '%s'", name));
 
             if (rs.next()) {
@@ -168,12 +169,12 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
             return SQLERROR;
         };
 
-        lastId = queryLatestId.apply(connection);
+        lastId = queryLatestId.apply(readOnlyConnection);
 
         if (lastId == SQLERROR) return newId;
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate(String.format("INSERT INTO routecategories(name, description) VALUES ('%s', '%s')",
                     instance.getName(),
                     instance.getDescription()));
@@ -182,12 +183,12 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
             throwables.printStackTrace();
         }
 
-        newId[0] = queryLatestId.apply(connection);
+        newId[0] = queryLatestId.apply(readOnlyConnection);
 
         if (newId[0] == SQLERROR || newId[0] <= lastId) {
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
@@ -197,7 +198,7 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
 
         if (isAtomic) {
             try {
-                connection.commit();
+                writeConnection.commit();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -229,13 +230,13 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
         boolean updateSuccessful = false;
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate(String.format("UPDATE routecategories SET name = '%s', description = '%s' WHERE id = %d",
                     instance.getName(),
                     instance.getDescription(),
                     instance.getId()));
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             updateSuccessful = true;
             st.close();
 
@@ -247,7 +248,7 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -281,10 +282,10 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
         boolean deletionSuccessful = false;
 
         try {
-            Statement st = connection.createStatement();
+            Statement st = writeConnection.createStatement();
             st.executeUpdate("DELETE FROM routecategories WHERE id = " + id[0]);
 
-            if (isAtomic) connection.commit();
+            if (isAtomic) writeConnection.commit();
             deletionSuccessful = true;
             st.close();
 
@@ -293,7 +294,7 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
             throwables.printStackTrace();
             if (isAtomic) {
                 try {
-                    connection.rollback();
+                    writeConnection.rollback();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -323,7 +324,12 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
      * {@inheritDoc}
      */
     @Override
-    public void setConnection(Connection connection) {
-        this.connection = connection;
+    public void setReadOnlyConnection(Connection connection) {
+        this.readOnlyConnection = connection;
+    }
+
+    @Override
+    public void setWriteConnection(Connection connection) {
+        this.writeConnection = connection;
     }
 }

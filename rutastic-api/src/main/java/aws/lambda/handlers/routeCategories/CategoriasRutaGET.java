@@ -1,4 +1,4 @@
-package aws.lambda.handlers;
+package aws.lambda.handlers.routeCategories;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -19,7 +19,9 @@ public class CategoriasRutaGET implements RequestHandler<APIGatewayProxyRequestE
 
     // On cold boot set up and create a db connection
     static {
-        jdbcManager.setUpAndConnect(System.getenv("READ_ENDPOINT"),
+        jdbcManager.setUpAndConnect(
+                System.getenv("READ_ENDPOINT"),
+                System.getenv("WRITE_ENDPOINT"),
                 Integer.parseInt(System.getenv("PORT")),
                 System.getenv("DB_USER"),
                 System.getenv("DB_USER_PWD"),
@@ -28,7 +30,6 @@ public class CategoriasRutaGET implements RequestHandler<APIGatewayProxyRequestE
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
-
         GetAllRouteCategoriesResponse response = GetAllRouteCategories.run();
 
         if (response.getRouteCategoriesList() == null || response.getRouteCategoriesList().isEmpty())

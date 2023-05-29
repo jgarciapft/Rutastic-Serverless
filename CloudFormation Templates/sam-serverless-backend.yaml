@@ -21,9 +21,9 @@ Globals:
         DB_SCHEMA: rutastic
         DB_USER: root
         DB_USER_PWD: adminadmin
-        READ_ENDPOINT: 0.tcp.eu.ngrok.io
-        WRITE_ENDPOINT: 0.tcp.eu.ngrok.io
-        PORT: 13912
+        READ_ENDPOINT: 7.tcp.eu.ngrok.io
+        WRITE_ENDPOINT: 7.tcp.eu.ngrok.io
+        PORT: 16898
     CodeUri: rutastic-api
 
 Resources:
@@ -109,7 +109,7 @@ Resources:
     Properties:
       FunctionName: rutastic-categoriasruta-get
       Role: !Ref LambdaExecutionRoleArn
-      Handler: aws.lambda.handlers.CategoriasRutaGET
+      Handler: aws.lambda.handlers.routeCategories.CategoriasRutaGET
       Events:
         Api:
           Type: Api
