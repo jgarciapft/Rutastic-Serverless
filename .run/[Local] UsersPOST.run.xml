@@ -1,0 +1,40 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="[Local] UsersPOST" type="aws.lambda" factoryName="Local">
+    <option name="credentialProviderId" value="profile:default" />
+    <option name="regionId" value="us-east-1" />
+    <option name="debugHost" value="localhost" />
+    <option name="architecture" value="x86_64" />
+    <option name="environmentVariables">
+      <map>
+        <entry key="DB_SCHEMA" value="rutastic" />
+        <entry key="DB_USER" value="root" />
+        <entry key="DB_USER_PWD" value="adminadmin" />
+        <entry key="PORT" value="14070" />
+        <entry key="READ_ENDPOINT" value="5.tcp.eu.ngrok.io" />
+        <entry key="WRITE_ENDPOINT" value="5.tcp.eu.ngrok.io" />
+      </map>
+    </option>
+    <option name="handler" value="aws.lambda.handlers.users.UsersPOST" />
+    <option name="image" value="false" />
+    <option name="logicalFunctionName" />
+    <option name="memorySize" value="1024" />
+    <option name="pathMappings">
+      <list />
+    </option>
+    <option name="platform" />
+    <option name="runtime" value="java11" />
+    <option name="templateFile" />
+    <option name="timeout" value="15" />
+    <option name="useTemplate" value="false" />
+    <option name="input" value="D:\00 Personal\Educacion\UEX\TFG\Workspace\Rutastic-Serverless\rutastic-api\src\test\resources\aws\lambda\users\UsersPOST\event-invalidUser.json" />
+    <option name="inputIsFile" value="true" />
+    <sam>
+      <option name="additionalBuildArgs" value="" />
+      <option name="additionalLocalArgs" value="" />
+      <option name="buildInContainer" value="false" />
+      <option name="dockerNetwork" value="" />
+      <option name="skipImagePull" value="false" />
+    </sam>
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,4 +1,4 @@
-package resources;
+package resources.model;
 
 /**
  * POJO to use when the API has to return an error code an a reason

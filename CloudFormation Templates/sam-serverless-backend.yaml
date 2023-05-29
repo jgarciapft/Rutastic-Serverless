@@ -21,9 +21,9 @@ Globals:
         DB_SCHEMA: rutastic
         DB_USER: root
         DB_USER_PWD: adminadmin
-        READ_ENDPOINT: 7.tcp.eu.ngrok.io
-        WRITE_ENDPOINT: 7.tcp.eu.ngrok.io
-        PORT: 16898
+        READ_ENDPOINT: 5.tcp.eu.ngrok.io
+        WRITE_ENDPOINT: 5.tcp.eu.ngrok.io
+        PORT: 14070
     CodeUri: rutastic-api
 
 Resources:
@@ -75,6 +75,7 @@ Resources:
       ExplicitAuthFlows:
         - ALLOW_USER_SRP_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
       AccessTokenValidity: 60
       IdTokenValidity: 60
       RefreshTokenValidity: 30
@@ -83,6 +84,15 @@ Resources:
         IdToken: minutes
         RefreshToken: days
       PreventUserExistenceErrors: ENABLED
+
+  TESTCognitoUserPoolUser:
+    Type: AWS::Cognito::UserPoolUser
+    Properties:
+      UserPoolId: !Ref CognitoUserPool
+      Username: testuser-jgarciapft
+      UserAttributes:
+        - Name: email
+          Value: testuser-jgarciapft@alumnos.unex.es
 
   ApiGatewayRestApi:
     Type: AWS::Serverless::Api
@@ -104,12 +114,12 @@ Resources:
 #        AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
 #        AllowOrigin: "'*'"
 
-  LambdaCategoriasRutaGET:
+  LambdaRouteCategoriesGET:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: rutastic-categoriasruta-get
+      FunctionName: rutastic-routecategories-get
       Role: !Ref LambdaExecutionRoleArn
-      Handler: aws.lambda.handlers.routeCategories.CategoriasRutaGET
+      Handler: aws.lambda.handlers.routeCategories.RouteCategoriesGET
       Events:
         Api:
           Type: Api
@@ -119,6 +129,52 @@ Resources:
             Path: /categoriasruta
             Auth:
               Authorizer: NONE
+
+  LambdaUsersGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-users-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.users.UsersGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /usuarios
+            Auth:
+              Authorizer: NONE
+
+  LambdaUsersPOST:
+      Type: AWS::Serverless::Function
+      Properties:
+        FunctionName: rutastic-users-post
+        Role: !Ref LambdaExecutionRoleArn
+        Handler: aws.lambda.handlers.users.UsersPOST
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              RestApiId: !Ref ApiGatewayRestApi
+              Method: POST
+              Path: /usuarios
+              Auth:
+                Authorizer: NONE
+
+  LambdaUserProxyDELETE:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-user-proxy-delete
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.users.UserProxyDELETE
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: DELETE
+            Path: /usuarios/{proxy+}
 
 Outputs:
   CognitoUserPoolId:

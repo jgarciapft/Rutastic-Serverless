@@ -1,0 +1,19 @@
+GET https://{{apiEndpoint}}/{{apiStage}}/usuarios
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/usuarios?estadistica=invalid-statistic
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/usuarios?estadistica=top5UsuariosPorTopRutas
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/usuarios?estadistica=top5UsuariosPorMediaKudos
+Accept: application/json
+
+###

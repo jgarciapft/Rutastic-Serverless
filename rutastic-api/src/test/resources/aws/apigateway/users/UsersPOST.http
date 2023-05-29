@@ -1,0 +1,17 @@
+POST https://{{apiEndpoint}}/{{apiStage}}/usuarios
+Content-Type: application/json
+
+{
+  "username": "testuser-jgarciapft"
+}
+
+###
+
+POST https://{{apiEndpoint}}/{{apiStage}}/usuarios
+Content-Type: application/json
+
+{
+  "username": "really-long-username-that-wont-fit"
+}
+
+###

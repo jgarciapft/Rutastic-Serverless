@@ -3,7 +3,7 @@ package model.statistic;
 import java.io.Serializable;
 
 /**
- * Java Bean that can hold one statistic about an user identified by the username
+ * Java Bean that can hold one statistic about a user identified by the username
  */
 public class UserStatistic implements Serializable {
 

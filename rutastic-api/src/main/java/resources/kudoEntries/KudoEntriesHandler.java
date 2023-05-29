@@ -7,8 +7,8 @@ import dao.KudoEntryDAO;
 import dao.factories.DAOAbstractFactory;
 import dao.implementations.DAOImplJDBC;
 import model.KudoEntry;
-import resources.APIErrorBody;
-import resources.APIGatewayProxyResponse;
+import resources.model.APIErrorBody;
+import resources.model.APIGatewayProxyResponse;
 import helper.MySQLConnectionManager;
 
 import java.util.Map;

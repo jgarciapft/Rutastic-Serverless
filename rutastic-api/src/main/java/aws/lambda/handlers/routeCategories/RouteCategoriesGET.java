@@ -12,7 +12,7 @@ import resources.routeCategories.model.GetAllRouteCategoriesResponse;
 import static aws.lambda.HTTPStatusCodes.NO_CONTENT;
 import static aws.lambda.HTTPStatusCodes.OK;
 
-public class CategoriasRutaGET implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class RouteCategoriesGET implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private static final MySQLConnectionManager jdbcManager = MySQLConnectionManager.getInstance();
     private static final Gson gson = new Gson();

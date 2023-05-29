@@ -11,6 +11,10 @@ public class GetAllRouteCategoriesResponse {
     public GetAllRouteCategoriesResponse() {
     }
 
+    public GetAllRouteCategoriesResponse(List<RouteCategory> routeCategoriesList) {
+        this.routeCategoriesList = routeCategoriesList;
+    }
+
     public List<RouteCategory> getRouteCategoriesList() {
         return routeCategoriesList;
     }

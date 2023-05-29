@@ -15,8 +15,6 @@ public class GetAllRouteCategories {
 
         List<RouteCategory> allCategories = routeCategoryDAO.getAll();
 
-        GetAllRouteCategoriesResponse response = new GetAllRouteCategoriesResponse();
-        response.setRouteCategoriesList(allCategories);
-        return response;
+        return new GetAllRouteCategoriesResponse(allCategories);
     }
 }

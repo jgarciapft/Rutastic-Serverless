@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="SAM Deploy" type="ShConfigurationType">
+  <configuration default="false" name="SAM Deploy - Serverless Backend" type="ShConfigurationType">
     <option name="SCRIPT_TEXT" value="sam deploy --config-file '.\CloudFormation Templates\sam-serverless-backend-samconfig.toml'" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />

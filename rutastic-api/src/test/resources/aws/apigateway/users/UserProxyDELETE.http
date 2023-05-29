@@ -1,0 +1,11 @@
+DELETE https://{{apiEndpoint}}/{{apiStage}}/usuarios/testuser-jgarciapft
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+DELETE https://{{apiEndpoint}}/{{apiStage}}/usuarios/david20
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
