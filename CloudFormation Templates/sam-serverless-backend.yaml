@@ -23,7 +23,7 @@ Globals:
         DB_USER_PWD: adminadmin
         READ_ENDPOINT: 5.tcp.eu.ngrok.io
         WRITE_ENDPOINT: 5.tcp.eu.ngrok.io
-        PORT: 14070
+        PORT: 18056
     CodeUri: rutastic-api
 
 Resources:
@@ -175,6 +175,20 @@ Resources:
             RestApiId: !Ref ApiGatewayRestApi
             Method: DELETE
             Path: /usuarios/{proxy+}
+
+  LambdaKudoEntriesUserProxyGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-kudoentries-user-proxy-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.kudoEntries.KudoEntriesUserProxyGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /kudos/{proxy+}
 
 Outputs:
   CognitoUserPoolId:

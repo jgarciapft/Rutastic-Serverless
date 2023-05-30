@@ -11,6 +11,10 @@ public class GetAllUsersResponse {
     public GetAllUsersResponse() {
     }
 
+    public GetAllUsersResponse(List<User> allUsers) {
+        this.allUsers = allUsers;
+    }
+
     public List<User> getAllUsers() {
         return allUsers;
     }

@@ -38,10 +38,6 @@ public class UsersPOST implements RequestHandler<APIGatewayProxyRequestEvent, AP
 
         RegisterUserResponse response = RegisterUser.run(new RegisterUserRequest(newUser));
 
-        if (response.flagged(RegisterUserResponse.Flags.INFO_USER_REGISTERED_SUCCESSFULLY))
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(CREATED);
-
         if (response.flagged(RegisterUserResponse.Flags.ERROR_INVALID_USER))
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(BAD_REQUEST)
@@ -57,6 +53,7 @@ public class UsersPOST implements RequestHandler<APIGatewayProxyRequestEvent, AP
                     .withStatusCode(INTERNAR_SERVER_ERROR)
                     .withBody(response.getFlagMessage(RegisterUserResponse.Flags.ERROR_UNABLE_TO_REGISTER));
 
-        return null;
+        return new APIGatewayProxyResponseEvent()
+                .withStatusCode(CREATED);
     }
 }

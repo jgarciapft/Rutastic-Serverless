@@ -341,8 +341,6 @@ Resources:
             RestApiId: !Ref ApiGatewayRestApi
             Method: GET
             Path: /kudos/{proxy+}
-            Auth:
-              Authorizer: NONE
 
 Outputs:
   RutasticDBInstancePublicEndpoint:

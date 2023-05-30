@@ -42,17 +42,6 @@ public class DateTimeUtils {
     }
 
     /**
-     * @param units      UNIX timestamp
-     * @param timeZone   Adjust the timestamp for a specific time zone
-     * @param resolution Resolution of the timestamp, SECONDS or MILLISECONDS
-     * @return A string that represents the date object in the format 'dd MMMM yyyy - HH:mm'
-     */
-    public static String formatEpochTime(long units, int resolution, TimeZone timeZone) {
-        // Date objects can only take UNIX timestamps expressed in milliseconds, so do the conversion when dealing with seconds
-        return formatDate(new Date(resolution == TimeResolution.SECONDS ? units * 1000L : units), timeZone);
-    }
-
-    /**
      * @return The Simple Date Format object used to format dates
      */
     public static SimpleDateFormat getDateFormatter() {

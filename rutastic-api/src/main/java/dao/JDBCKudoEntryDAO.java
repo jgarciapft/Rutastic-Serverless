@@ -49,7 +49,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
 
         try {
             Statement st = readOnlyConnection.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM routekudosregistry_unixtime");
+            ResultSet rs = st.executeQuery("SELECT * FROM routekudosregistry");
 
             while (rs.next()) {
                 currentEntry = kEntryModelMapper.parseFromResultSet(rs);
@@ -59,8 +59,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
                             currentEntry.getUser(),
                             currentEntry.getRoute(),
                             currentEntry.getModifier(),
-                            DateTimeUtils.formatEpochTime(currentEntry.getSubmissionDate(),
-                                    DateTimeUtils.TimeResolution.SECONDS)));
+                            DateTimeUtils.formatEpochTime(currentEntry.getSubmissionDate(), DateTimeUtils.TimeResolution.SECONDS)));
                 } else {
                     logger.warning("Attempted to read a NULL kudo entry");
                 }
@@ -89,7 +88,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
 
         try {
             Statement st = readOnlyConnection.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM routekudosregistry_unixtime WHERE user = '" + username + "'");
+            ResultSet rs = st.executeQuery(String.format("SELECT * FROM routekudosregistry WHERE user = '%s'", username));
 
             while (rs.next()) {
                 currentEntry = kEntryModelMapper.parseFromResultSet(rs);
@@ -99,8 +98,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
                             currentEntry.getUser(),
                             currentEntry.getRoute(),
                             currentEntry.getModifier(),
-                            DateTimeUtils.formatEpochTime(currentEntry.getSubmissionDate(),
-                                    DateTimeUtils.TimeResolution.SECONDS)));
+                            DateTimeUtils.formatEpochTime(currentEntry.getSubmissionDate(), DateTimeUtils.TimeResolution.SECONDS)));
                 } else {
                     logger.warning("Attempted to read a NULL kudo entry");
                 }
@@ -130,7 +128,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
 
         try {
             Statement st = readOnlyConnection.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM routekudosregistry_unixtime WHERE route = " + routeId);
+            ResultSet rs = st.executeQuery(String.format("SELECT * FROM routekudosregistry WHERE route = %d", routeId));
 
             while (rs.next()) {
                 currentEntry = kEntryModelMapper.parseFromResultSet(rs);
@@ -140,8 +138,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
                             currentEntry.getUser(),
                             currentEntry.getRoute(),
                             currentEntry.getModifier(),
-                            DateTimeUtils.formatEpochTime(currentEntry.getSubmissionDate(),
-                                    DateTimeUtils.TimeResolution.SECONDS)));
+                            DateTimeUtils.formatEpochTime(currentEntry.getSubmissionDate(), DateTimeUtils.TimeResolution.SECONDS)));
                 } else {
                     logger.warning("Attempted to read a NULL kudo entry");
                 }
@@ -172,8 +169,8 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
 
         try {
             Statement st = readOnlyConnection.createStatement();
-            ResultSet rs = st.executeQuery(String.format("SELECT * FROM routekudosregistry_unixtime " +
-                    "WHERE user = '%s' AND route = %d", username, routeId));
+            ResultSet rs = st.executeQuery(
+                    String.format("SELECT * FROM routekudosregistry WHERE user = '%s' AND route = %d", username, routeId));
 
             if (rs.next()) {
                 kudoEntry = kEntryModelMapper.parseFromResultSet(rs);
@@ -181,10 +178,9 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
                         kudoEntry.getUser(),
                         kudoEntry.getRoute(),
                         kudoEntry.getModifier(),
-                        DateTimeUtils.formatEpochTime(kudoEntry.getSubmissionDate(),
-                                DateTimeUtils.TimeResolution.SECONDS)));
+                        DateTimeUtils.formatEpochTime(kudoEntry.getSubmissionDate(), DateTimeUtils.TimeResolution.SECONDS)));
             } else {
-                logger.warning("There's no Kudo entry by the id (" + username + "," + routeId + ")");
+                logger.warning(String.format("There's no Kudo entry by the id (%s,%d)", username, routeId));
             }
 
             st.close();
@@ -214,24 +210,25 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
     @Override
     public Object[] add2(KudoEntry instance, boolean isAtomic) {
         long SQLERROR = -1L;
-        Object[] idOfAddedInstance = {instance.getUser(), instance.getRoute()}; // Copy provided id to return on success
 
         if (!dependenciesConfigured()) return new Object[]{SQLERROR};
 
         try {
             Statement st = writeConnection.createStatement();
-            st.executeUpdate(String.format("INSERT INTO routekudosregistry(user, route, modifier) VALUES ('%s', %d, %d)",
+            st.executeUpdate(String.format("INSERT INTO routekudosregistry(user, route, modifier, submission_date) VALUES ('%s', %d, %d, %d)",
                     instance.getUser(),
                     instance.getRoute(),
-                    instance.getModifier()));
+                    instance.getModifier(),
+                    instance.getSubmissionDate()));
 
             if (isAtomic) writeConnection.commit();
             st.close();
 
-            logger.info(String.format("[NEW KUDO ENTRY CREATED] user: %s | route: %s | modifier: %d",
+            logger.info(String.format("[NEW KUDO ENTRY CREATED] user: %s | route: %s | modifier: %d | submission date: %s",
                     instance.getUser(),
                     instance.getRoute(),
-                    instance.getModifier()));
+                    instance.getModifier(),
+                    DateTimeUtils.formatEpochTime(instance.getSubmissionDate(), DateTimeUtils.TimeResolution.SECONDS)));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             if (isAtomic) {
@@ -241,10 +238,11 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
                     e.printStackTrace();
                 }
             }
-            idOfAddedInstance = new Object[]{SQLERROR}; // Set error status
+            return new Object[]{SQLERROR};
         }
 
-        return idOfAddedInstance;
+        // Kudo entry ID to return on success
+        return new Object[]{instance.getUser(), instance.getRoute()};
     }
 
     /**
@@ -268,8 +266,10 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
 
         try {
             Statement st = writeConnection.createStatement();
-            st.executeUpdate(String.format("UPDATE routekudosregistry SET modifier = %d WHERE user = '%s' AND route = %d",
+            st.executeUpdate(String.format("UPDATE routekudosregistry SET modifier = %d AND submission_date = %d " +
+                            "WHERE user = '%s' AND route = %d",
                     instance.getModifier(),
+                    instance.getSubmissionDate(),
                     instance.getUser(),
                     instance.getRoute()));
 
@@ -277,10 +277,11 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
             updateSuccessful = true;
             st.close();
 
-            logger.info(String.format("[KUDO ENTRY UPDATED] user: %s | route: %s | modifier: %d",
+            logger.info(String.format("[KUDO ENTRY UPDATED] user: %s | route: %s | modifier: %d | submission_date: %s",
                     instance.getUser(),
                     instance.getRoute(),
-                    instance.getModifier()));
+                    instance.getModifier(),
+                    DateTimeUtils.formatEpochTime(instance.getSubmissionDate(), DateTimeUtils.TimeResolution.SECONDS)));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             if (isAtomic) {
@@ -296,7 +297,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
     }
 
     /**
-     * @throws UnsupportedOperationException Not supportes. See deleteByPKey()
+     * @throws UnsupportedOperationException Not supported. See deleteByPKey()
      */
     @Override
     public boolean deleteById(long... id) {
@@ -325,7 +326,7 @@ public class JDBCKudoEntryDAO implements KudoEntryDAO, DAOImplJDBC {
             deletionSuccessful = true;
             st.close();
 
-            logger.info("[Kudo entry with the id (" + username + ", " + routeId + ") has been deleted]");
+            logger.info(String.format("[Kudo entry with the id (%s, %d) has been deleted]", username, routeId));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             if (isAtomic) {

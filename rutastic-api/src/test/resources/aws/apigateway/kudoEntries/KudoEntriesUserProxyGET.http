@@ -1,0 +1,29 @@
+GET https://{{apiEndpoint}}/{{apiStage}}/kudos/testuser-jgarciapft
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/kudos/jgarciapft
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/kudos/testuser-jgarciapft/3
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/kudos/jgarciapft/3
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/kudos/testuser-jgarciapft/999999
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###

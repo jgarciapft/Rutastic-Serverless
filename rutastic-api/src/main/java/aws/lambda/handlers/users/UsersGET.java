@@ -43,7 +43,7 @@ public class UsersGET implements RequestHandler<APIGatewayProxyRequestEvent, API
         if (httpQuery.containsKey("estadistica")) return handleGetUserStatisticsRequest(event, context);
 
         // Unknown request
-        return new APIGatewayProxyResponseEvent().withStatusCode(BAD_REQUEST);
+        return new APIGatewayProxyResponseEvent().withStatusCode(NOT_FOUND);
     }
 
     private APIGatewayProxyResponseEvent handleGetAllUsersRequest(APIGatewayProxyRequestEvent event, Context context) {

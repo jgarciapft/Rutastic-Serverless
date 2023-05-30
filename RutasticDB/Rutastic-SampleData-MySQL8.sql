@@ -15,6 +15,10 @@ VALUES ('jgarciapft');
 INSERT INTO users(username)
 VALUES ('robert123');
 
+-- TEST USERS. Users
+INSERT INTO users(username)
+VALUES ('testuser-jgarciapft');
+
 -- Routes
 
 INSERT INTO routes (created_by_user, title, description, distance, duration, elevation, creation_date, skill_level,
@@ -225,3 +229,14 @@ INSERT INTO routekudosregistry (user, route, modifier, submission_date)
 VALUES ('robert123', 6, 1, unix_timestamp());
 INSERT INTO routekudosregistry (user, route, modifier, submission_date)
 VALUES ('robert123', 11, -1, unix_timestamp(date('2020-07-11 00:00:00')));
+
+-- TEST USERS. Users give kudos to routes
+
+INSERT INTO routekudosregistry (user, route, modifier, submission_date)
+VALUES ('testuser-jgarciapft', 3, 1, unix_timestamp());
+INSERT INTO routekudosregistry (user, route, modifier, submission_date)
+VALUES ('testuser-jgarciapft', 7, -1, unix_timestamp(date('2020-07-11 00:00:00')));
+INSERT INTO routekudosregistry (user, route, modifier, submission_date)
+VALUES ('testuser-jgarciapft', 8, 1, unix_timestamp());
+INSERT INTO routekudosregistry (user, route, modifier, submission_date)
+VALUES ('testuser-jgarciapft', 11, -1, unix_timestamp());

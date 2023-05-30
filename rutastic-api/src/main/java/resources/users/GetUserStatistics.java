@@ -15,8 +15,8 @@ public class GetUserStatistics {
 
     public static GetUserStatisticsResponse run(GetUserStatisticsRequest request) {
         UserDAO userDAO = DAOAbstractFactory.get().impl(DAOImplJDBC.class).forModel(User.class);
+
         String requestedStat = request.getUserStatistic();
-        GetUserStatisticsResponse response = new GetUserStatisticsResponse();
 
         if (requestedStat.equals("top5UsuariosPorTopRutas")) { // Serve top 5 users by top monthly routes
 
@@ -29,8 +29,7 @@ public class GetUserStatistics {
                     .limit(5)
                     .collect(Collectors.toList());
 
-            response.setUserStatistics(top5UsersByTopMonthlyRoutes);
-            return response;
+            return new GetUserStatisticsResponse(top5UsersByTopMonthlyRoutes);
         }
 
         if (requestedStat.equals("top5UsuariosPorMediaKudos")) { // Serve top 5 users by average kudo ratings of their routes
@@ -44,10 +43,10 @@ public class GetUserStatistics {
                     .limit(5)
                     .collect(Collectors.toList());
 
-            response.setUserStatistics(top5UsersByAvgKudos);
-            return response;
+            return new GetUserStatisticsResponse(top5UsersByAvgKudos);
         }
 
+        GetUserStatisticsResponse response = new GetUserStatisticsResponse();
         response.flag(GetUserStatisticsResponse.Flags.ERROR_UNKNOWN_STATISTIC);
         return response;
     }

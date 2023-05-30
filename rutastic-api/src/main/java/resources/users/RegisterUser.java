@@ -12,7 +12,9 @@ public class RegisterUser {
 
     public static RegisterUserResponse run(RegisterUserRequest request) {
         UserDAO userDAO = DAOAbstractFactory.get().impl(DAOImplJDBC.class).forModel(User.class);
+
         User newUser = request.getNewUser();
+
         RegisterUserResponse response = new RegisterUserResponse();
 
         if (!newUserIsValid(newUser)) {

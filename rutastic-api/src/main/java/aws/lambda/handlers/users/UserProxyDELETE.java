@@ -53,10 +53,6 @@ public class UserProxyDELETE implements RequestHandler<APIGatewayProxyRequestEve
                         requestedUsername,
                         new UserClaimedIdentity(claimedCognitoUsername)));
 
-        if (response.flagged(DeleteUserResponse.Flags.INFO_USER_DELETED))
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(NO_CONTENT);
-
         if (response.flagged(DeleteUserResponse.Flags.ERROR_USER_NOT_FOUND))
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(NOT_FOUND)
@@ -72,6 +68,7 @@ public class UserProxyDELETE implements RequestHandler<APIGatewayProxyRequestEve
                     .withStatusCode(INTERNAR_SERVER_ERROR)
                     .withBody(response.getFlagMessage(DeleteUserResponse.Flags.ERROR_USER_DELETION_UNSUCCESSFUL));
 
-        return null;
+        return new APIGatewayProxyResponseEvent()
+                .withStatusCode(NO_CONTENT);
     }
 }

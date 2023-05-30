@@ -15,8 +15,6 @@ public class GetAllUsers {
 
         List<User> allUsers = userDAO.getAll();
 
-        GetAllUsersResponse response = new GetAllUsersResponse();
-        response.setAllUsers(allUsers);
-        return response;
+        return new GetAllUsersResponse(allUsers);
     }
 }

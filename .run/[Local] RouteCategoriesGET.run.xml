@@ -9,7 +9,7 @@
         <entry key="DB_SCHEMA" value="rutastic" />
         <entry key="DB_USER" value="root" />
         <entry key="DB_USER_PWD" value="adminadmin" />
-        <entry key="PORT" value="14070" />
+        <entry key="PORT" value="18056" />
         <entry key="READ_ENDPOINT" value="5.tcp.eu.ngrok.io" />
         <entry key="WRITE_ENDPOINT" value="5.tcp.eu.ngrok.io" />
       </map>
