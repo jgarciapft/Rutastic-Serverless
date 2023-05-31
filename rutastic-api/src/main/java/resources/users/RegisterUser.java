@@ -6,7 +6,7 @@ import dao.implementations.DAOImplJDBC;
 import model.User;
 import resources.users.model.RegisterUserRequest;
 import resources.users.model.RegisterUserResponse;
-import resources.users.validators.UsernameValidators;
+import model.validators.UserValidation;
 
 public class RegisterUser {
 
@@ -38,6 +38,6 @@ public class RegisterUser {
     }
 
     private static boolean newUserIsValid(User newUser) {
-        return newUser != null && UsernameValidators.usernameIsValid(newUser.getUsername());
+        return newUser != null && UserValidation.usernameIsValid(newUser.getUsername());
     }
 }

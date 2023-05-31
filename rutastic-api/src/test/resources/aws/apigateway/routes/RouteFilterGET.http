@@ -1,0 +1,16 @@
+# Valid params
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/filtro?buscarTexto=que&ordenarPorKudos=no-ordenar&kudosMinimos=0&ocultarRutasBloq=false&mostrarMisrutas=pablogpz&filtroDificultad=1&filtroUsuario=pablogpz&distanciaMinima=0&distanciaMaxima=999999
+Accept: application/json
+
+###
+
+# Invalid Params
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/filtro?filtroDificultad=facil
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/filtro
+Accept: application/json
+
+###

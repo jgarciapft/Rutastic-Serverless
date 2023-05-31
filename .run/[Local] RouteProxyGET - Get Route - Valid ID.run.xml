@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="[Local] UsersPOST" type="aws.lambda" factoryName="Local">
+  <configuration default="false" name="[Local] RouteProxyGET - Get Route - Valid ID" type="aws.lambda" factoryName="Local" folderName="[Local] RouteProxyGET">
     <option name="credentialProviderId" value="profile:default" />
     <option name="regionId" value="us-east-1" />
     <option name="debugHost" value="localhost" />
@@ -9,12 +9,12 @@
         <entry key="DB_SCHEMA" value="rutastic" />
         <entry key="DB_USER" value="root" />
         <entry key="DB_USER_PWD" value="adminadmin" />
-        <entry key="PORT" value="18056" />
-        <entry key="READ_ENDPOINT" value="5.tcp.eu.ngrok.io" />
-        <entry key="WRITE_ENDPOINT" value="5.tcp.eu.ngrok.io" />
+        <entry key="PORT" value="3306" />
+        <entry key="READ_ENDPOINT" value="172.17.0.2" />
+        <entry key="WRITE_ENDPOINT" value="172.17.0.2" />
       </map>
     </option>
-    <option name="handler" value="aws.lambda.handlers.users.UsersPOST" />
+    <option name="handler" value="aws.lambda.handlers.routes.RouteProxyGET" />
     <option name="image" value="false" />
     <option name="logicalFunctionName" />
     <option name="memorySize" value="1024" />
@@ -26,7 +26,7 @@
     <option name="templateFile" />
     <option name="timeout" value="15" />
     <option name="useTemplate" value="false" />
-    <option name="input" value="D:\00 Personal\Educacion\UEX\TFG\Workspace\Rutastic-Serverless\rutastic-api\src\test\resources\aws\lambda\users\UsersPOST\event-invalidUser.json" />
+    <option name="input" value="D:\00 Personal\Educacion\UEX\TFG\Workspace\Rutastic-Serverless\rutastic-api\src\test\resources\aws\lambda\routes\RouteProxyGET\event-getRoute-valid_id.json" />
     <option name="inputIsFile" value="true" />
     <sam>
       <option name="additionalBuildArgs" value="" />

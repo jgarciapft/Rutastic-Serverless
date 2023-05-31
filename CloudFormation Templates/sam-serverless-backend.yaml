@@ -21,9 +21,9 @@ Globals:
         DB_SCHEMA: rutastic
         DB_USER: root
         DB_USER_PWD: adminadmin
-        READ_ENDPOINT: 5.tcp.eu.ngrok.io
-        WRITE_ENDPOINT: 5.tcp.eu.ngrok.io
-        PORT: 18056
+        READ_ENDPOINT: pablogpz.asuscomm.com
+        WRITE_ENDPOINT: pablogpz.asuscomm.com
+        PORT: 33060
     CodeUri: rutastic-api
 
 Resources:
@@ -189,6 +189,54 @@ Resources:
             RestApiId: !Ref ApiGatewayRestApi
             Method: GET
             Path: /kudos/{proxy+}
+
+  LambdaRouteProxyGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-proxy-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteProxyGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /rutas/{proxy+}
+            Auth:
+              Authorizer: NONE
+
+  LambdaRouteFilterGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-filter-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteFilterGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /rutas/filtro
+            Auth:
+              Authorizer: NONE
+
+  LambdaRouteStatisticsGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-statistics-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteStatisticsGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /rutas/estadisticas
+            Auth:
+              Authorizer: NONE
 
 Outputs:
   CognitoUserPoolId:

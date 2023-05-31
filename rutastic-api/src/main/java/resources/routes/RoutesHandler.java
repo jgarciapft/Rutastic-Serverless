@@ -131,7 +131,7 @@ public class RoutesHandler implements RequestHandler<APIGatewayProxyRequestEvent
         // Check that the route could be retrieved
 
         if (requestedRoute == null)
-            return new APIGatewayProxyResponse<>(NOT_FOUND, new APIErrorBody("No se encuentra la ruta solicitada"));
+            return new APIGatewayProxyResponse<>(NOT_FOUND, new APIErrorBody(""));
 
         return new APIGatewayProxyResponse<>(OK, requestedRoute);
     }

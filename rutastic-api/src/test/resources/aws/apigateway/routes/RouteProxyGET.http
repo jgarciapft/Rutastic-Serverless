@@ -1,0 +1,44 @@
+# Route retrieval endpoints
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/1
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/invalid-id
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/999999
+Accept: application/json
+
+###
+
+# Related routes endpoints
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/1/similares?por=distancia&deltaDistancia=1500
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/1/similares?por=distancia
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/1/similares?por=dificultad
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/1/similares?por=categorias
+Accept: application/json
+
+###
+
+# Invalid request
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/1/similares
+Accept: application/json
+
+###

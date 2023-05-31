@@ -1,0 +1,14 @@
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/estadisticas?e=topRutasSemanal
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/estadisticas?e=topRutasMensual
+Accept: application/json
+
+###
+
+GET https://{{apiEndpoint}}/{{apiStage}}/rutas/estadisticas?e=invalid-stat
+Accept: application/json
+
+###

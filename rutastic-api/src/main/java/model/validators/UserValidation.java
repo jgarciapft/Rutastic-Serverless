@@ -1,6 +1,6 @@
-package resources.users.validators;
+package model.validators;
 
-public class UsernameValidators {
+public class UserValidation {
 
     public static final String USERNAME_REGEX = "[a-zA-Z0-9_-]+";
 

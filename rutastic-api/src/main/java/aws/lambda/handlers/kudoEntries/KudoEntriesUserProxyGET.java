@@ -13,7 +13,7 @@ import resources.kudoEntries.model.GetUserKudoEntriesForRouteResponse;
 import resources.kudoEntries.model.GetUserKudoEntriesRequest;
 import resources.kudoEntries.model.GetUserKudoEntriesResponse;
 import resources.model.UserClaimedIdentity;
-import resources.users.validators.UsernameValidators;
+import model.validators.UserValidation;
 
 import java.util.Map;
 
@@ -42,11 +42,11 @@ public class KudoEntriesUserProxyGET implements RequestHandler<APIGatewayProxyRe
         // Decide how to handle the API Gateway event to return the adequate data
 
         // Requested GET /kudos/{usuario}
-        if (resourceProxyValue.matches(UsernameValidators.USERNAME_REGEX))
+        if (resourceProxyValue.matches(UserValidation.USERNAME_REGEX))
             return handleGetUserKudoEntriesRequest(event, context);
 
         // Requested GET /kudos/{usuario}/{idRuta}
-        if (resourceProxyValue.matches(String.format("%s/[0-9]+", UsernameValidators.USERNAME_REGEX)))
+        if (resourceProxyValue.matches(String.format("%s/[0-9]+", UserValidation.USERNAME_REGEX)))
             return handleGetUserKudoEntriesForRouteRequest(event, context);
 
         // Unknown requested resource

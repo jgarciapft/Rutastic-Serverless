@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="[Local] RouteCategoriesGET" type="aws.lambda" factoryName="Local" nameIsGenerated="true">
+  <configuration default="false" name="[Local] RouteCategoriesGET" type="aws.lambda" factoryName="Local" folderName="[Local] RouteCategoriesGET" nameIsGenerated="true">
     <option name="credentialProviderId" value="profile:default" />
     <option name="regionId" value="us-east-1" />
     <option name="debugHost" value="localhost" />
@@ -9,9 +9,9 @@
         <entry key="DB_SCHEMA" value="rutastic" />
         <entry key="DB_USER" value="root" />
         <entry key="DB_USER_PWD" value="adminadmin" />
-        <entry key="PORT" value="18056" />
-        <entry key="READ_ENDPOINT" value="5.tcp.eu.ngrok.io" />
-        <entry key="WRITE_ENDPOINT" value="5.tcp.eu.ngrok.io" />
+        <entry key="PORT" value="3306" />
+        <entry key="READ_ENDPOINT" value="172.17.0.2" />
+        <entry key="WRITE_ENDPOINT" value="172.17.0.2" />
       </map>
     </option>
     <option name="handler" value="aws.lambda.handlers.routeCategories.RouteCategoriesGET" />
