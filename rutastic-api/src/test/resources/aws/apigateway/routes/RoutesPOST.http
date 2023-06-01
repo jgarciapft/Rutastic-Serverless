@@ -1,0 +1,27 @@
+# Valid request
+POST https://{{apiEndpoint}}/{{apiStage}}/rutas
+Content-Type: application/json
+Auth: {{cognitoIDToken}}
+
+{
+  "title": "New test route",
+  "description": "This is a test route",
+  "distance": "1337",
+  "duration": "69",
+  "elevation": "420",
+  "categories": "senderismo, carrera",
+  "skillLevel": "facil"
+}
+
+###
+
+# Invalid request
+POST https://{{apiEndpoint}}/{{apiStage}}/rutas
+Content-Type: application/json
+Auth: {{cognitoIDToken}}
+
+{
+  "title": ""
+}
+
+###

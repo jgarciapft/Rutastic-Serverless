@@ -238,6 +238,47 @@ Resources:
             Auth:
               Authorizer: NONE
 
+  LambdaRoutesPOST:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-routes-post
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RoutesPOST
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: POST
+            Path: /rutas
+
+  LambdaRouteProxyPUT:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-proxy-put
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteProxyPUT
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: PUT
+            Path: /rutas/{proxy+}
+
+  LambdaRouteProxyDELETE:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-proxy-delete
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteProxyDELETE
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: DELETE
+            Path: /rutas/{proxy+}
 Outputs:
   CognitoUserPoolId:
     Description: Cognito User Pool ID

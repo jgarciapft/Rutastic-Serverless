@@ -1,6 +1,7 @@
 package helper;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
@@ -25,11 +26,7 @@ public class DateTimeUtils {
         return ISO8601Formatter.parse(datetimeString);
     }
 
-    public static long getEpochSeconds(TemporalAccessor temporalAccessor) {
-        return Instant.from(temporalAccessor).getEpochSecond();
-    }
-
     public static long getEpochSeconds(String datetimeString) {
-        return Instant.from(parseISO8601(datetimeString)).getEpochSecond();
+        return LocalDateTime.from(parseISO8601(datetimeString)).toEpochSecond(ZoneOffset.UTC);
     }
 }

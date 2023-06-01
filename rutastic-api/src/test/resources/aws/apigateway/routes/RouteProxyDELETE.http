@@ -1,0 +1,20 @@
+# Valid - Authorized
+DELETE https://{{apiEndpoint}}/{{apiStage}}/rutas/13
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+# Valid - No Route
+DELETE https://{{apiEndpoint}}/{{apiStage}}/rutas/999999
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+# Valid - Unauthorized
+DELETE https://{{apiEndpoint}}/{{apiStage}}/rutas/1
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###

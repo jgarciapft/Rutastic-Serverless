@@ -7,6 +7,7 @@ import java.util.List;
 public class RouteValidation {
 
     public static final String ROUTE_ID_REGEX = "[0-9]+";
+    public static final String CATEGORIES_REGEX = String.format("((senderismo|carrera|ciclismo)(%s)?)+", Route.CATEGORY_SEPARATOR);
 
     public static boolean routeIdStringIsValid(String routeIdString) {
         return routeIdString != null
@@ -28,7 +29,7 @@ public class RouteValidation {
      * @return If the route bean is valid
      */
     public static boolean validateFormFields(Route route, List<String> validationMessages) {
-        boolean validBean = true; // Suppose it initially is a valid bean
+        boolean validFields = true;
 
         if (route == null)
             return false;
@@ -37,44 +38,42 @@ public class RouteValidation {
 
         if (route.getTitle() == null || route.getTitle().trim().isEmpty()) {
             validationMessages.add("Introduzca un título para la ruta");
-            validBean = false;
+            validFields = false;
         }
         if (route.getDescription() == null || route.getDescription().trim().isEmpty()) {
             validationMessages.add("Introduzca una descripción para la ruta");
-            validBean = false;
+            validFields = false;
         }
         if (route.getDistance() <= 0) {
             validationMessages.add("La distancia de la ruta debe ser un número positivo de metros");
-            validBean = false;
+            validFields = false;
         }
         if (route.getDuration() <= 0) {
             validationMessages.add("La duración de la ruta debe ser un número positivo de minutos");
-            validBean = false;
+            validFields = false;
         }
         if (route.getElevation() <= 0) {
             validationMessages.add("La elevación de la ruta debe ser un número positivo de metros");
-            validBean = false;
+            validFields = false;
         }
         if (route.getCategories() == null || route.getCategories().trim().isEmpty()) {
             validationMessages.add("No se ha especificado ninguna categoría para la ruta");
-            validBean = false;
+            validFields = false;
         }
-        if (route.getCategories() == null ||
-                !route.getCategories().trim().matches(
-                        String.format("((senderismo|carrera|ciclismo)(%s)?)+", Route.CATEGORY_SEPARATOR))) {
+        if (route.getCategories() == null || !route.getCategories().trim().matches(CATEGORIES_REGEX)) {
             validationMessages.add("Nombre(s) de categoría(s) desconocido(s)");
-            validBean = false;
+            validFields = false;
         }
         if (route.getCategories() == null || route.getSkillLevel().trim().isEmpty()) {
             validationMessages.add("No se ha especificado ninguna dificultad para la categoría");
-            validBean = false;
+            validFields = false;
         }
         if (route.getSkillLevel() == null || !route.getSkillLevel().trim().matches("((facil|media|dificil),?)+")) {
             validationMessages.add("Grado de dificultad desconocido");
-            validBean = false;
+            validFields = false;
         }
 
-        return validBean;
+        return validFields;
     }
 
     /**
@@ -87,7 +86,7 @@ public class RouteValidation {
      * @return If the route bean is valid for a route edition attempt
      */
     public static boolean validateRouteEditionAttempt(Route route, List<String> validationMessages) {
-        boolean validBean = true;
+        boolean validID = true;
 
         if (route == null)
             return false;
@@ -96,13 +95,13 @@ public class RouteValidation {
 
         if (!routeIdIsValid(route.getId())) {
             validationMessages.add("El ID de la ruta no es válida");
-            validBean = false;
+            validID = false;
         }
 
         // Validate form fields
 
         boolean validFields = validateFormFields(route, validationMessages);
 
-        return validBean && validFields;
+        return validID && validFields;
     }
 }

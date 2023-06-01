@@ -160,8 +160,8 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
 
         try {
             Statement st = writeConnection.createStatement();
-            st.executeUpdate(String.format("INSERT INTO routes(created_by_user, title, description, distance, duration, elevation, creation_date, skill_level)" +
-                            " VALUES ('%s', '%s', '%s', %d, %d, %d, %d, '%s')",
+            st.executeUpdate(String.format("INSERT INTO routes(created_by_user, title, description, distance, duration, elevation, creation_date, skill_level, blocked)" +
+                            " VALUES ('%s', '%s', '%s', %d, %d, %d, %d, '%s', %d)",
                     instance.getCreatedByUser(),
                     instance.getTitle(),
                     instance.getDescription(),
@@ -169,7 +169,8 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
                     instance.getDuration(),
                     instance.getElevation(),
                     DateTimeUtils.getEpochSeconds(instance.getCreationDate()),
-                    instance.getSkillLevel()));
+                    instance.getSkillLevel(),
+                    instance.isBlocked() ? 1 : 0));
             st.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();

@@ -65,7 +65,7 @@ public class UserProxyDELETE implements RequestHandler<APIGatewayProxyRequestEve
 
         if (response.flagged(DeleteUserResponse.Flags.ERROR_USER_DELETION_UNSUCCESSFUL))
             return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(INTERNAR_SERVER_ERROR)
+                    .withStatusCode(INTERNAL_SERVER_ERROR)
                     .withBody(response.getFlagMessage(DeleteUserResponse.Flags.ERROR_USER_DELETION_UNSUCCESSFUL));
 
         return new APIGatewayProxyResponseEvent()

@@ -19,8 +19,13 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
  */
 public class Route implements Serializable {
 
-    public static final String CATEGORY_SEPARATOR = ", ";
     private static final long SerialVersionUID = 1L;
+
+    public static final String DEFAULT_SKILL_LEVEL = "facil";
+    public static final int DEFAULT_KUDOS = 0;
+    public static final boolean DEFAULT_BLOCKED_STATE = false;
+
+    public static final String CATEGORY_SEPARATOR = ", ";
 
     private long id;
     private String createdByUser;
@@ -37,8 +42,8 @@ public class Route implements Serializable {
 
     public Route() {
         // Default values
-        kudos = 0;
-        blocked = false;
+        kudos = DEFAULT_KUDOS;
+        blocked = DEFAULT_BLOCKED_STATE;
     }
 
     public long getId() {

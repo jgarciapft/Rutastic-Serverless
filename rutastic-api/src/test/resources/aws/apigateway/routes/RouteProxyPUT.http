@@ -1,0 +1,135 @@
+# CHANGE ROUTE BLOCKED STATE
+
+# Valid action - Authorized
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/13/estado?accion=bloquear
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+# Valid action - No Route
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/999999/estado?accion=bloquear
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+# Valid action - Unauthorized
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/1/estado?accion=bloquear
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+# Invalid Action Param
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/13/estado?accion=invalid-action
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+# CHANGE KUDOS
+
+# Valid Action
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/1/kudos?accion=dar
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+# Valid Action - No Route
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/999999/kudos?accion=dar
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+# Invalid Action Param
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/999999/kudos?accion=invalid-action
+Accept: application/json
+Auth: {{cognitoIDToken}}
+
+###
+
+# EDIT ROUTES
+
+# Valid Action - Authorized
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/13
+Content-Type: application/json
+Auth: {{cognitoIDToken}}
+
+{
+  "id": "13",
+  "title": "Changed title",
+  "description": "Changed description",
+  "distance": "7331",
+  "duration": "96",
+  "elevation": "024",
+  "categories": "senderismo",
+  "skillLevel": "dificil"
+}
+
+###
+
+# Valid Edit - No Route
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/999999
+Content-Type: application/json
+Auth: {{cognitoIDToken}}
+
+{
+  "id": "999999",
+  "title": "Changed title",
+  "description": "Changed description",
+  "distance": "7331",
+  "duration": "96",
+  "elevation": "024",
+  "categories": "senderismo",
+  "skillLevel": "dificil"
+}
+
+###
+
+# Valid Edit - Unauthorized
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/1
+Content-Type: application/json
+Auth: {{cognitoIDToken}}
+
+{
+  "id": "1",
+  "title": "Changed title",
+  "description": "Changed description",
+  "distance": "7331",
+  "duration": "96",
+  "elevation": "024",
+  "categories": "senderismo",
+  "skillLevel": "dificil"
+}
+
+###
+
+# Invalid Edit
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/13
+Content-Type: application/json
+Auth: {{cognitoIDToken}}
+
+{
+  "id": "13"
+}
+
+###
+
+# Invalid Edit - Different Route IDs
+PUT https://{{apiEndpoint}}/{{apiStage}}/rutas/13
+Content-Type: application/json
+Auth: {{cognitoIDToken}}
+
+{
+  "id": "13333333",
+  "title": "Changed title",
+  "description": "Changed description",
+  "distance": "7331",
+  "duration": "96",
+  "elevation": "024",
+  "categories": "senderismo",
+  "skillLevel": "dificil"
+}

@@ -50,7 +50,7 @@ public class UsersPOST implements RequestHandler<APIGatewayProxyRequestEvent, AP
 
         if (response.flagged(RegisterUserResponse.Flags.ERROR_UNABLE_TO_REGISTER))
             return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(INTERNAR_SERVER_ERROR)
+                    .withStatusCode(INTERNAL_SERVER_ERROR)
                     .withBody(response.getFlagMessage(RegisterUserResponse.Flags.ERROR_UNABLE_TO_REGISTER));
 
         return new APIGatewayProxyResponseEvent()
