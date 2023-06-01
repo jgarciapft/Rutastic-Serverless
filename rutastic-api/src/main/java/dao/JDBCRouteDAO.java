@@ -160,14 +160,15 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
 
         try {
             Statement st = writeConnection.createStatement();
-            st.executeUpdate(String.format("INSERT INTO routes(created_by_user, title, description, distance, duration, elevation, skill_level)" +
-                            " VALUES ('%s', '%s', '%s', %d, %d, %d, '%s')",
+            st.executeUpdate(String.format("INSERT INTO routes(created_by_user, title, description, distance, duration, elevation, creation_date, skill_level)" +
+                            " VALUES ('%s', '%s', '%s', %d, %d, %d, %d, '%s')",
                     instance.getCreatedByUser(),
                     instance.getTitle(),
                     instance.getDescription(),
                     instance.getDistance(),
                     instance.getDuration(),
                     instance.getElevation(),
+                    DateTimeUtils.getEpochSeconds(instance.getCreationDate()),
                     instance.getSkillLevel()));
             st.close();
         } catch (SQLException throwables) {
@@ -210,7 +211,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
                 newId[0],
                 instance.getCreatedByUser(),
                 instance.getTitle(),
-                instance.getCreationDate() == null ? DateTimeUtils.formatDate(new Date()) : instance.getCreationDate(),
+                instance.getCreationDate(),
                 instance.getKudos(),
                 instance.getCategories()));
 

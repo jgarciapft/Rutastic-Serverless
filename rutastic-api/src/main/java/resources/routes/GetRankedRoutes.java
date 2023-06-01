@@ -29,11 +29,6 @@ public class GetRankedRoutes {
                     .limit(5)
                     .collect(Collectors.toList());
 
-            // Set route creation date to the format of the top route card container
-
-            top5RoutesOfTheWeek
-                    .forEach(route -> route.changeDateFormat(new SimpleDateFormat("dd MMM - HH:mm")));
-
             return new GetRankedRoutesResponse(top5RoutesOfTheWeek);
 
         } else if (requestedRankCriterion.equals("topRutasMensual")) { // Serve the top 5 monthly routes
@@ -46,11 +41,6 @@ public class GetRankedRoutes {
                     .stream()
                     .limit(5)
                     .collect(Collectors.toList());
-
-            // Set route creation date to the format of the top route card container
-
-            top5RoutesOfTheMonth
-                    .forEach(route -> route.changeDateFormat(new SimpleDateFormat("dd MMM - HH:mm")));
 
             return new GetRankedRoutesResponse(top5RoutesOfTheMonth);
 

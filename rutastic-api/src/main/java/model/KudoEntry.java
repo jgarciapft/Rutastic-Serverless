@@ -12,7 +12,7 @@ public class KudoEntry implements Serializable {
     private String user;
     private long route;
     private int modifier;
-    private long submissionDate;
+    private String submissionDate;
 
     public KudoEntry() {
     }
@@ -41,11 +41,11 @@ public class KudoEntry implements Serializable {
         this.modifier = modifier;
     }
 
-    public long getSubmissionDate() {
+    public String getSubmissionDate() {
         return submissionDate;
     }
 
-    public void setSubmissionDate(long submissionDate) {
+    public void setSubmissionDate(String submissionDate) {
         this.submissionDate = submissionDate;
     }
 }

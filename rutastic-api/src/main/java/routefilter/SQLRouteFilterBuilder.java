@@ -1,6 +1,7 @@
 package routefilter;
 
 import model.Route;
+import model.validators.RouteValidation;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -229,7 +230,7 @@ public class SQLRouteFilterBuilder implements RouteFilterBuilder<SQLRouteFilter>
 
             // If the route is valid add it to the exclusion set
 
-            if (Route.validateID(routeId))
+            if (RouteValidation.routeIdIsValid((routeId)))
                 excludedRoutes.add(routeId);
         }
 

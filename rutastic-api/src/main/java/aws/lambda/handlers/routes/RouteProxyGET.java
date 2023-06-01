@@ -8,8 +8,6 @@ import com.google.gson.Gson;
 import helper.MySQLConnectionManager;
 import helper.TypeUtils;
 import model.validators.RouteValidation;
-import resources.model.APIErrorBody;
-import resources.model.APIGatewayProxyResponse;
 import resources.model.RequestParameter;
 import resources.routes.GetRelatedRoutes;
 import resources.routes.GetRoute;
@@ -61,7 +59,7 @@ public class RouteProxyGET implements RequestHandler<APIGatewayProxyRequestEvent
         // Validate the route ID
 
         long routeId;
-        if (RouteValidation.routeIdIsValid(routeIdString))
+        if (RouteValidation.routeIdStringIsValid(routeIdString))
             routeId = Long.parseLong(routeIdString);
         else
             return new APIGatewayProxyResponseEvent().withStatusCode(BAD_REQUEST).withBody("ID de ruta inválido");

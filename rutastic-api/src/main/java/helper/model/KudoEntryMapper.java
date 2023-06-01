@@ -1,10 +1,12 @@
 package helper.model;
 
+import helper.DateTimeUtils;
 import model.KudoEntry;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.Map;
 
 public class KudoEntryMapper implements ModelMapper<KudoEntry> {
@@ -50,7 +52,7 @@ public class KudoEntryMapper implements ModelMapper<KudoEntry> {
         } catch (SQLException ignored) {
         }
         try {
-            kudoEntry.setSubmissionDate(rs.getLong("submission_date"));
+            kudoEntry.setSubmissionDate(DateTimeUtils.formatISO8601(Instant.ofEpochSecond(rs.getLong("submission_date"))));
         } catch (SQLException ignored) {
         }
 

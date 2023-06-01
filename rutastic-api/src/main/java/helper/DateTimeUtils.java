@@ -1,59 +1,35 @@
 package helper;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
 /**
  * Date and time utility class
  */
 public class DateTimeUtils {
 
-    /**
-     * @param date     Date object storing a date
-     * @return A capitalized string that represents the date object. It contains the day of the week, day of the month,
-     * name of the month and the timestamp. Equivalent to the format 'dd MMMM yyyy - HH:mm'
-     */
-    public static String formatDate(Date date) {
-        return formatDate(date, TimeZone.getTimeZone("UTC"));
+    public static DateTimeFormatter ISO8601Formatter = ISO_LOCAL_DATE_TIME;
+
+    public static String formatISO8601(TemporalAccessor temporalAccessor) {
+        if (temporalAccessor instanceof Instant)
+            temporalAccessor = Instant.from(temporalAccessor).atZone(ZoneOffset.UTC);
+
+        return ISO8601Formatter.format(temporalAccessor);
     }
 
-    /**
-     * @param date     Date object storing a date
-     * @param timeZone Adjust the date for a specific time zone
-     * @return A capitalized string that represents the date object. It contains the day of the week, day of the month,
-     * name of the month and the timestamp. Equivalent to the format 'dd MMMM yyyy - HH:mm'
-     */
-    public static String formatDate(Date date, TimeZone timeZone) {
-        SimpleDateFormat dateFormatter = getDateFormatter();
-        dateFormatter.setTimeZone(timeZone);
-
-        // Only format date if it isn't null
-        return date != null ? dateFormatter.format(date).toUpperCase() : "EMPTY_DATETIME";
+    public static TemporalAccessor parseISO8601(String datetimeString) {
+        return ISO8601Formatter.parse(datetimeString);
     }
 
-    /**
-     * @param units      UNIX timestamp
-     * @param resolution Resolution of the timestamp, SECONDS or MILLISECONDS
-     * @return A string that represents the date object in the format 'dd MMMM yyyy - HH:mm'
-     */
-    public static String formatEpochTime(long units, int resolution) {
-        return formatDate(new Date(resolution == TimeResolution.SECONDS ? units * 1000L : units));
+    public static long getEpochSeconds(TemporalAccessor temporalAccessor) {
+        return Instant.from(temporalAccessor).getEpochSecond();
     }
 
-    /**
-     * @return The Simple Date Format object used to format dates
-     */
-    public static SimpleDateFormat getDateFormatter() {
-        return new SimpleDateFormat("dd MMMM yyyy - HH:mm");
+    public static long getEpochSeconds(String datetimeString) {
+        return Instant.from(parseISO8601(datetimeString)).getEpochSecond();
     }
-
-    /**
-     * Constants for specifying the scale of a UNIX timestamp
-     */
-    public static class TimeResolution {
-        public static final int MILLISECONDS = 1;
-        public static final int SECONDS = 2;
-    }
-
 }

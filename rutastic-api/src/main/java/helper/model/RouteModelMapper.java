@@ -5,6 +5,7 @@ import model.Route;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -95,8 +96,8 @@ public class RouteModelMapper implements ModelMapper<Route> {
         } catch (SQLException ignored) {
         }
         try {
-            route.setCreationDate(DateTimeUtils
-                    .formatEpochTime(rs.getLong("creation_date"), DateTimeUtils.TimeResolution.SECONDS));
+            route.setCreationDate(
+                    DateTimeUtils.formatISO8601(Instant.ofEpochSecond(rs.getLong("creation_date"))));
         } catch (SQLException ignored) {
         }
         try {

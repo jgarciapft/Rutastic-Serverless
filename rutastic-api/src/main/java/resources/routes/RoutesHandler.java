@@ -14,6 +14,7 @@ import dao.implementations.RouteDAOImplJDBC;
 import model.KudoEntry;
 import model.Route;
 import model.User;
+import model.validators.RouteValidation;
 import resources.model.APIErrorBody;
 import resources.model.APIGatewayProxyResponse;
 import helper.MySQLConnectionManager;
@@ -285,11 +286,6 @@ public class RoutesHandler implements RequestHandler<APIGatewayProxyRequestEvent
                     .limit(5)
                     .collect(Collectors.toList());
 
-            // Set route creation date to the format of the top route card container
-
-            top5RoutesOfTheWeek
-                    .forEach(route -> route.changeDateFormat(new SimpleDateFormat("dd MMM - HH:mm")));
-
             return new APIGatewayProxyResponse<>(OK, top5RoutesOfTheWeek);
 
         } else if (requestedStat.equals("topRutasMensual")) { // Serve the top 5 monthly routes
@@ -302,11 +298,6 @@ public class RoutesHandler implements RequestHandler<APIGatewayProxyRequestEvent
                     .stream()
                     .limit(5)
                     .collect(Collectors.toList());
-
-            // Set route creation date to the format of the top route card container
-
-            top5RoutesOfTheMonth
-                    .forEach(route -> route.changeDateFormat(new SimpleDateFormat("dd MMM - HH:mm")));
 
             return new APIGatewayProxyResponse<>(OK, top5RoutesOfTheMonth);
 
@@ -433,7 +424,7 @@ public class RoutesHandler implements RequestHandler<APIGatewayProxyRequestEvent
         // Validate the route
 
         ArrayList<String> validationMessages = new ArrayList<>();
-        if (newRoute == null || !newRoute.validateFormFields(validationMessages))
+        if (newRoute == null || !RouteValidation.validateFormFields(newRoute, validationMessages))
             return new APIGatewayProxyResponse<>(BAD_REQUEST,
                     new APIErrorBody("La ruta proporcionada es inválida\n" + validationMessages.toString()));
 
@@ -464,7 +455,7 @@ public class RoutesHandler implements RequestHandler<APIGatewayProxyRequestEvent
 
         // Validate the route ID
 
-        if (!Route.validateID(routeId))
+        if (!RouteValidation.routeIdIsValid((routeId)))
             return new APIGatewayProxyResponse<>(BAD_REQUEST, new APIErrorBody("ID de ruta inválido"));
 
         // Validate the requested action. It can either be a request to block or unblock a route
@@ -529,7 +520,7 @@ public class RoutesHandler implements RequestHandler<APIGatewayProxyRequestEvent
 
         // Validate the route ID
 
-        if (!Route.validateID(routeId))
+        if (!RouteValidation.routeIdIsValid((routeId)))
             return new APIGatewayProxyResponse<>(BAD_REQUEST, new APIErrorBody("ID de ruta inválido"));
 
         // Validate the requested action. It can either be a request to give or take the logged user's kudo given to the requested route
@@ -602,12 +593,12 @@ public class RoutesHandler implements RequestHandler<APIGatewayProxyRequestEvent
         // Validate the route ID
 
         ArrayList<String> validationMessages = new ArrayList<>();
-        if (!Route.validateID(routeId))
+        if (!RouteValidation.routeIdIsValid((routeId)))
             return new APIGatewayProxyResponse<>(BAD_REQUEST, new APIErrorBody("ID de ruta inválido"));
 
         // Validate the uploaded route
 
-        if (uploadedRoute == null || !uploadedRoute.validateRouteEditionAttempt(validationMessages))
+        if (uploadedRoute == null || !RouteValidation.validateRouteEditionAttempt(uploadedRoute, validationMessages))
             return new APIGatewayProxyResponse<>(BAD_REQUEST,
                     new APIErrorBody("La ruta proporcionada es inválida" + validationMessages.toString()));
 
@@ -655,7 +646,7 @@ public class RoutesHandler implements RequestHandler<APIGatewayProxyRequestEvent
 
         // Validate the route ID
 
-        if (!Route.validateID(routeId))
+        if (!RouteValidation.routeIdIsValid((routeId)))
             return new APIGatewayProxyResponse<>(BAD_REQUEST, new APIErrorBody("ID de ruta inválido"));
 
         Route routeBeingDeleted = routeDAO.getById(routeId);
