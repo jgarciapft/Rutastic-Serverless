@@ -24,8 +24,8 @@ Globals:
         READ_ENDPOINT: pablogpz.asuscomm.com
         WRITE_ENDPOINT: pablogpz.asuscomm.com
         PORT: 33060
+        CORS_ALLOWED_ORIGINS: '*'
     CodeUri: rutastic-api
-
 Resources:
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
@@ -109,10 +109,10 @@ Resources:
               Header: Auth
         DefaultAuthorizer: CognitoAuthorizer
         AddDefaultAuthorizerToCorsPreflight: false
-#      Cors:
-#        AllowHeaders: "'Content-Type,Authorization,Auth,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
-#        AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-#        AllowOrigin: "'*'"
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'Content-Type,Authorization,Auth,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
 
   LambdaRouteCategoriesGET:
     Type: AWS::Serverless::Function
@@ -281,10 +281,8 @@ Resources:
             Path: /rutas/{proxy+}
 Outputs:
   CognitoUserPoolId:
-    Description: Cognito User Pool ID
     Value: !Ref CognitoUserPool
   CognitoUserPoolClientId:
-    Description: Cognito User Pool Client ID
     Value: !Ref CognitoUserPoolClient
   RutasticAPIEndpoint:
     Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${RutasticAPIStageName}"

@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
+import helper.CORSConfiguration;
 import helper.MySQLConnectionManager;
 import model.Route;
 import resources.model.UserClaimedIdentity;
@@ -35,6 +36,11 @@ public class RoutesPOST implements RequestHandler<APIGatewayProxyRequestEvent, A
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
+        return handleRequestDelegate(event, context)
+                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+    }
+
+    private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
         Route newRoute = gson.fromJson(event.getBody(), Route.class);
         String cognitoUsername = ((Map<String, String>) event.getRequestContext().getAuthorizer().get("claims"))
                 .get("cognito:username");

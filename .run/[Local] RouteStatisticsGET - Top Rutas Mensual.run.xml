@@ -6,6 +6,7 @@
     <option name="architecture" value="x86_64" />
     <option name="environmentVariables">
       <map>
+        <entry key="CORS_ALLOWED_ORIGINS" value="'*'" />
         <entry key="DB_SCHEMA" value="rutastic" />
         <entry key="DB_USER" value="root" />
         <entry key="DB_USER_PWD" value="adminadmin" />

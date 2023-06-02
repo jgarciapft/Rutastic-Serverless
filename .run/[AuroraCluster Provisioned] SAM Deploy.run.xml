@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="SAM Build - Serverless Backend" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="sam build -t '.\CloudFormation Templates\sam-serverless-backend.yaml' -s ." />
+  <configuration default="false" name="[AuroraCluster Provisioned] SAM Deploy" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="sam deploy --config-file '.\CloudFormation Templates\auroracluster-provisioned-samconfig.toml'" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />

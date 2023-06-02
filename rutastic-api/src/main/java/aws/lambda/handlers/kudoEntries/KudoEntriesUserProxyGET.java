@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
+import helper.CORSConfiguration;
 import helper.MySQLConnectionManager;
 import resources.kudoEntries.GetUserKudoEntries;
 import resources.kudoEntries.GetUserKudoEntriesForRoute;
@@ -37,6 +38,11 @@ public class KudoEntriesUserProxyGET implements RequestHandler<APIGatewayProxyRe
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
+        return handleRequestDelegate(event, context)
+                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+    }
+
+    private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
         String resourceProxyValue = event.getPathParameters().getOrDefault("proxy", "");
 
         // Decide how to handle the API Gateway event to return the adequate data

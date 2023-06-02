@@ -28,14 +28,15 @@ Globals:
     Timeout: 15
     Environment:
       Variables:
-        DB_USER: !Sub '{{resolve:secretsmanager:${AuroraDBServerlessCluster.MasterUserSecret.SecretArn}:SecretString:username}}'
-        DB_USER_PWD: !Sub '{{resolve:secretsmanager:${AuroraDBServerlessCluster.MasterUserSecret.SecretArn}:SecretString:password}}'
-        READ_ENDPOINT: !GetAtt AuroraDBServerlessCluster.ReadEndpoint.Address
-        WRITE_ENDPOINT: !GetAtt AuroraDBServerlessCluster.Endpoint.Address
-        PORT: !GetAtt AuroraDBServerlessCluster.Endpoint.Port
+        DB_USER: !Sub '{{resolve:secretsmanager:${AuroraDBCluster.MasterUserSecret.SecretArn}:SecretString:username}}'
+        DB_USER_PWD: !Sub '{{resolve:secretsmanager:${AuroraDBCluster.MasterUserSecret.SecretArn}:SecretString:password}}'
+        READ_ENDPOINT: !GetAtt AuroraDBCluster.ReadEndpoint.Address
+        WRITE_ENDPOINT: !GetAtt AuroraDBCluster.Endpoint.Address
+        PORT: !GetAtt AuroraDBCluster.Endpoint.Port
         DB_SCHEMA: rutastic
+        CORS_ALLOWED_ORIGINS: '*'
     VpcConfig:
-      SubnetIds: !Ref VPCId
+      SubnetIds: !Ref VPCSubnetsIds
       SecurityGroupIds:
         - !Ref DBSecurityGroupByEC2SG
     CodeUri: rutastic-api
@@ -114,7 +115,7 @@ Resources:
       GroupName: RutasticDB-AuroraCluster-SG
       VpcId: !Ref VPCId
       SecurityGroupIngress:
-        - SourceSecurityGroupName: RutasticDB-AuroraCluster-SG-wip
+        - SourceSecurityGroupName: RutasticDB-AuroraCluster-SG
           IpProtocol: -1
         - CidrIp: !Ref DBDevEndpointSourceCIDR
           IpProtocol: tcp
@@ -123,6 +124,249 @@ Resources:
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           IpProtocol: -1
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: RutasticUserPool
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      UsernameConfiguration:
+        CaseSensitive: false
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AutoVerifiedAttributes:
+        - email
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_CODE
+        EmailSubject: '[Rutastic] Tu código de verificación'
+        EmailMessage: 'Tu código de verificación para Rutastic es {####}'
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      MfaConfiguration: 'OFF'
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: Rutastic WebappSPA Client
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ReadAttributes:
+        - email
+        - email_verified
+      WriteAttributes:
+        - email
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+      PreventUserExistenceErrors: ENABLED
+
+  ApiGatewayRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: RutasticAPI
+      StageName: !Ref RutasticAPIStageName
+      EndpointConfiguration:
+        Type: REGIONAL
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
+            Identity:
+              Header: Auth
+        DefaultAuthorizer: CognitoAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'Content-Type,Authorization,Auth,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+
+  LambdaRouteCategoriesGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-routecategories-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routeCategories.RouteCategoriesGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /categoriasruta
+            Auth:
+              Authorizer: NONE
+
+  LambdaUsersGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-users-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.users.UsersGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /usuarios
+            Auth:
+              Authorizer: NONE
+
+  LambdaUsersPOST:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-users-post
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.users.UsersPOST
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: POST
+            Path: /usuarios
+            Auth:
+              Authorizer: NONE
+
+  LambdaUserProxyDELETE:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-user-proxy-delete
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.users.UserProxyDELETE
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: DELETE
+            Path: /usuarios/{proxy+}
+
+  LambdaKudoEntriesUserProxyGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-kudoentries-user-proxy-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.kudoEntries.KudoEntriesUserProxyGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /kudos/{proxy+}
+
+  LambdaRouteProxyGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-proxy-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteProxyGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /rutas/{proxy+}
+            Auth:
+              Authorizer: NONE
+
+  LambdaRouteFilterGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-filter-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteFilterGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /rutas/filtro
+            Auth:
+              Authorizer: NONE
+
+  LambdaRouteStatisticsGET:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-statistics-get
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteStatisticsGET
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: GET
+            Path: /rutas/estadisticas
+            Auth:
+              Authorizer: NONE
+
+  LambdaRoutesPOST:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-routes-post
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RoutesPOST
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: POST
+            Path: /rutas
+
+  LambdaRouteProxyPUT:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-proxy-put
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteProxyPUT
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: PUT
+            Path: /rutas/{proxy+}
+
+  LambdaRouteProxyDELETE:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: rutastic-route-proxy-delete
+      Role: !Ref LambdaExecutionRoleArn
+      Handler: aws.lambda.handlers.routes.RouteProxyDELETE
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiGatewayRestApi
+            Method: DELETE
+            Path: /rutas/{proxy+}
 Outputs:
   AuroraClusterSecretArn:
     Value: !GetAtt AuroraDBCluster.MasterUserSecret.SecretArn
@@ -130,3 +374,9 @@ Outputs:
     Value: !GetAtt AuroraDBCluster.Endpoint.Address
   AuroraClusterReadEndpoint:
     Value: !GetAtt AuroraDBCluster.ReadEndpoint.Address
+  CognitoUserPoolId:
+    Value: !Ref CognitoUserPool
+  CognitoUserPoolClientId:
+    Value: !Ref CognitoUserPoolClient
+  RutasticAPIEndpoint:
+    Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${RutasticAPIStageName}"

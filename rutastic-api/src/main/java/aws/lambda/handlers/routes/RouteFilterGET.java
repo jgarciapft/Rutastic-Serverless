@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
+import helper.CORSConfiguration;
 import helper.MySQLConnectionManager;
 import helper.TypeUtils;
 import resources.routes.ExecuteRouteFilter;
@@ -36,6 +37,11 @@ public class RouteFilterGET implements RequestHandler<APIGatewayProxyRequestEven
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
+        return handleRequestDelegate(event, context)
+                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+    }
+
+    private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
         Map<String, String> queryStringParameters =
                 event.getQueryStringParameters() != null ? event.getQueryStringParameters() : new HashMap<>();
 

@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Get test user tokens" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --auth-parameters  USERNAME=testuser-jgarciapft,PASSWORD=Serverless123! --client-id 76qm4dbg2nq0la0qteq41553j1" />
+  <configuration default="false" name="[AuroraCluster Provisiones] SAM Build" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="sam build -t '.\CloudFormation Templates\auroracluster-provisioned.yaml' -s ." />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />

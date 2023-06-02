@@ -1,4 +1,3 @@
-#file: noinspection YamlFormatViolation
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   VPCId:
@@ -85,7 +84,7 @@ Resources:
       GroupName: RutasticDB-AuroraCluster-SG
       VpcId: !Ref VPCId
       SecurityGroupIngress:
-        - SourceSecurityGroupName: RutasticDB-AuroraCluster-SG-wip
+        - SourceSecurityGroupName: RutasticDB-AuroraCluster-SG
           IpProtocol: -1
         - CidrIp: !Ref DBDevEndpointSourceCIDR
           IpProtocol: tcp

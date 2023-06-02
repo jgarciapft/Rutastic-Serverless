@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "AuroraClusterProvisionedTest"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-d9t24k9eyhtf"
+s3_prefix = "AuroraClusterProvisionedTest"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "VPCId=\"vpc-07281107e4d2a7ad6\" VPCSubnetsIds=\"subnet-06581d3f16aa5f968,subnet-0ac6d2b0fb1b2a307,subnet-0d32776a7d5b7544e,subnet-07f5a8a23d01befde,subnet-05bd055a4c43a4bee,subnet-0ba486455c0bf6e76\" DBDevEndpointSourceCIDR=\"81.43.214.123/32\""
+image_repositories = []

@@ -2,7 +2,7 @@ POST https://{{apiEndpoint}}/{{apiStage}}/usuarios
 Content-Type: application/json
 
 {
-  "username": "testuser-jgarciapft"
+  "username": "testuser-pablogpz"
 }
 
 ###

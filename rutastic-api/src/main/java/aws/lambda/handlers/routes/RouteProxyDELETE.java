@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
+import helper.CORSConfiguration;
 import helper.MySQLConnectionManager;
 import resources.model.UserClaimedIdentity;
 import resources.routes.DeleteRoute;
@@ -33,6 +34,11 @@ public class RouteProxyDELETE implements RequestHandler<APIGatewayProxyRequestEv
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
+        return handleRequestDelegate(event, context)
+                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+    }
+
+    private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
         long routeId = Long.parseLong(event.getPathParameters().get("proxy"));
         String cognitoUsername = ((Map<String, String>) event.getRequestContext().getAuthorizer().get("claims"))
                 .get("cognito:username");

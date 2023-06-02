@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
+import helper.CORSConfiguration;
 import helper.MySQLConnectionManager;
 import resources.model.UserClaimedIdentity;
 import resources.users.DeleteUser;
@@ -33,6 +34,11 @@ public class UserProxyDELETE implements RequestHandler<APIGatewayProxyRequestEve
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
+        return handleRequestDelegate(event, context)
+                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+    }
+
+    private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
         String requestedUsername = event.getPathParameters().getOrDefault("proxy", "").trim();
 
         if (requestedUsername.isEmpty())

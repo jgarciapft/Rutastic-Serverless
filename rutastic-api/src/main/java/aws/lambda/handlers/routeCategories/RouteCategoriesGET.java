@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
+import helper.CORSConfiguration;
 import helper.MySQLConnectionManager;
 import resources.routeCategories.GetAllRouteCategories;
 import resources.routeCategories.model.GetAllRouteCategoriesResponse;
@@ -30,6 +31,11 @@ public class RouteCategoriesGET implements RequestHandler<APIGatewayProxyRequest
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
+        return handleRequestDelegate(event, context)
+                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+    }
+
+    private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
         GetAllRouteCategoriesResponse response = GetAllRouteCategories.run();
 
         if (response.getRouteCategoriesList() == null || response.getRouteCategoriesList().isEmpty())
