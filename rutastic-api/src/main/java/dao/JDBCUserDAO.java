@@ -124,8 +124,7 @@ public class JDBCUserDAO implements UserDAO, DAOImplJDBC {
         try {
             Statement st = writeConnection.createStatement();
             // It can only register regular users, the default value for the role column
-            st.executeUpdate(String.format("INSERT INTO users(username) VALUES ('%s')",
-                    instance.getUsername()));
+            st.executeUpdate(String.format("INSERT INTO users(username) VALUES ('%s')", instance.getUsername()));
             st.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();

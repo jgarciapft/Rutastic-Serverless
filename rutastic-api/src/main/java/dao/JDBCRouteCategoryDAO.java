@@ -169,7 +169,7 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
             return SQLERROR;
         };
 
-        lastId = queryLatestId.apply(readOnlyConnection);
+        lastId = queryLatestId.apply(writeConnection);
 
         if (lastId == SQLERROR) return newId;
 
@@ -183,7 +183,7 @@ public class JDBCRouteCategoryDAO implements RouteCategoryDAO, DAOImplJDBC {
             throwables.printStackTrace();
         }
 
-        newId[0] = queryLatestId.apply(readOnlyConnection);
+        newId[0] = queryLatestId.apply(writeConnection);
 
         if (newId[0] == SQLERROR || newId[0] <= lastId) {
             if (isAtomic) {

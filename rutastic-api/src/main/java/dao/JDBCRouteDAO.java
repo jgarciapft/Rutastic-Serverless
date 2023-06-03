@@ -152,7 +152,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
             return SQLERROR;
         };
 
-        lastId = queryLatestId.apply(readOnlyConnection);
+        lastId = queryLatestId.apply(writeConnection);
 
         if (lastId == SQLERROR) return new long[]{SQLERROR};
 
@@ -176,7 +176,7 @@ public class JDBCRouteDAO implements RouteDAO, RouteDAOImplJDBC {
             throwables.printStackTrace();
         }
 
-        newId[0] = queryLatestId.apply(readOnlyConnection);
+        newId[0] = queryLatestId.apply(writeConnection);
 
         if (newId[0] == SQLERROR || newId[0] <= lastId) {
             if (isAtomic) {
