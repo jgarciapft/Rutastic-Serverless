@@ -16,8 +16,8 @@ public class CORSConfiguration {
         allowedHeaders = allowedHeaders == null || allowedHeaders.isEmpty() ? DEFAULT_ALLOWED_HEADERS : allowedHeaders;
 
         return Map.of(
-                "Access-Control-Allow-Origin", String.format("'%s'", allowedOrigins),
-                "Access-Control-Allow-Headers", String.format("'%s'", allowedHeaders)
+                "Access-Control-Allow-Origin", String.format("%s", allowedOrigins),
+                "Access-Control-Allow-Headers", String.format("%s", allowedHeaders)
         );
     }
 }
