@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  GitHubPersonalAccessToken:
+    Type: String
+Resources:
+  AmplifyHosting:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: RutasticSPA
+      Platform: WEB
+      AccessToken: !Ref GitHubPersonalAccessToken
+      Repository: https://github.com/jgarciapft/Rutastic-Serverless
+      CustomRules:
+        - Source: '/<*>'
+          Target: '/index.html'
+          Status: '404-200'
+
+  AmplifyProductionBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId: !GetAtt AmplifyHosting.AppId
+      BranchName: main
+      EnableAutoBuild: true
+      Framework: WEBPACK
+      Stage: PRODUCTION
+Outputs:
+  ProductionURL:
+    Value: !Sub 'https://${AmplifyProductionBranch.BranchName}.${AmplifyHosting.DefaultDomain}'
