@@ -1,7 +1,9 @@
+import {config} from "../app";
+
 angular.module('Rutastic')
     .factory('routeCategoriesFactory', ['$http', function ($http) {
 
-        let restBaseUrl = 'https://8m4aoe3so9.execute-api.us-east-1.amazonaws.com/dev/categoriasruta';
+        let restBaseUrl = `${config.aws.apiGateway.endpoint}/categoriasruta`;
 
         return {
             /**

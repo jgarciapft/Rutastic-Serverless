@@ -1,7 +1,9 @@
+import {config} from "../app";
+
 angular.module('Rutastic')
     .factory('kudoEntriesFactory', ['$http', 'usersFactory', function ($http, usersFactory) {
 
-        let restBaseUrl = 'https://8m4aoe3so9.execute-api.us-east-1.amazonaws.com/dev/kudos'
+        let restBaseUrl = `${config.aws.apiGateway.endpoint}/kudos`;
 
         // FACTORY INTERFACE
 

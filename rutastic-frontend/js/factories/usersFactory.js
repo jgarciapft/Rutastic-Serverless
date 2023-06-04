@@ -1,4 +1,7 @@
+import AWS from "aws-sdk";
 import {Auth} from "@aws-amplify/auth";
+
+import {config} from "../app";
 
 angular.module('Rutastic')
     // Services related to users resource
@@ -6,7 +9,7 @@ angular.module('Rutastic')
 
         // LOCAL VARs
 
-        let restBaseUrl = 'https://8m4aoe3so9.execute-api.us-east-1.amazonaws.com/dev/usuarios';
+        let restBaseUrl = `${config.aws.apiGateway.endpoint}/usuarios`;
 
         let cognitoIDP = new AWS.CognitoIdentityServiceProvider({region: 'eu-west-1'})
 

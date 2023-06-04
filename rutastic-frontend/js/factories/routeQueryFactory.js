@@ -1,9 +1,11 @@
+import {config} from "../app";
+
 angular.module('Rutastic')
     .factory('routeQueryFactory',
         ['$http', '$httpParamSerializer', 'kudoEntriesFactory', 'usersFactory', 'routesFactory',
             function ($http, $httpParamSerializer, kudoEntriesFactory, usersFactory, routesFactory) {
 
-                let restUrl = 'https://8m4aoe3so9.execute-api.us-east-1.amazonaws.com/dev/rutas/filtro'
+                let restBaseUrl = `${config.aws.apiGateway.endpoint}/rutas/filtro`;
 
                 // FACTORY PROPERTIES
 
@@ -35,7 +37,7 @@ angular.module('Rutastic')
                     routeQueryFactory.latestRouteQuery = query; // Update the latest executed route query
 
                     return $http
-                        .get(`${restUrl}?${$httpParamSerializer(query)}`)
+                        .get(`${restBaseUrl}?${$httpParamSerializer(query)}`)
                         .then(response => {
                             routeQueryFactory.filteredRoutes = response.data;
                             console.log(`Retrieved (${routeQueryFactory.filteredRoutes.length}) routes from route query`);

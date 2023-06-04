@@ -1,14 +1,17 @@
 {
   "name": "rutastic",
+  "description": "Rutastic SPA",
   "version": "1.0.0",
-  "description": "",
-  "main": "js/app.js",
+  "main": "js/main.js",
   "scripts": {
     "build": "webpack"
   },
   "dependencies": {
     "@aws-amplify/core": "^3.3.13",
-    "@aws-amplify/auth": "^3.3.13"
+    "@aws-amplify/auth": "^3.3.13",
+    "angular": "1.6.9",
+    "angular-route": "1.6.9",
+    "aws-sdk": "2.820.0"
   },
   "devDependencies": {
     "webpack": "^4.17.1",
