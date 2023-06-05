@@ -98,7 +98,7 @@ angular.module('Rutastic')
         }
 
         /**
-         * Attemp to log in an user provided his credentials
+         * Attempt to log in a user provided his credentials
          *
          * @param username
          * @param password

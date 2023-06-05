@@ -17,17 +17,31 @@ angular.module('Rutastic')
              */
             submitRegistrationForm: function () {
 
+                // Validate username
+
+                const username = registrationVM.user.username;
+                if (username.length < 3 || username.length > 30) {
+                    registrationVM.errorMessage = 'El nombre de usuario debe tener entre 3 y 30 caracteres';
+                    return;
+                }
+
+                if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+                    registrationVM.errorMessage = 'El nombre de usuario solo puede contener letras, números, guiones y guiones bajos';
+                    return;
+                }
+
                 // Check all enforced password policies before trying to register a new user
+
                 let checksAgainstPolicies = usersFactory.checkPasswordAgainstPolicies(registrationVM.user.password);
                 if (checksAgainstPolicies === 0) {
-                    // Password is valid, try registrating the new user
+                    // Password is valid, try registering the new user
                     usersFactory
                         .registerNewUser(registrationVM.user)
                         .then(function () {
 
                             // On successful registration redirect the user to the verification
 
-                            $location.path(`/Verificar/${registrationVM.user.username}`);
+                            $location.path(`/Verificar/${username}`);
                             $scope.$apply();
                             registrationVM.errorMessage = ''; // On successful registration clear the error message
                         }, function () {
