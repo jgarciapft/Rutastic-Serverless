@@ -7,6 +7,10 @@ Parameters:
   LambdaExecutionRoleArn:
     Type: String
     Description: ARN del rol asociado a las funciones Lambda
+  VPCSubnetsIds:
+    Type: List<AWS::EC2::Subnet::Id>
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
 Globals:
   Function:
     Runtime: java11
@@ -18,13 +22,17 @@ Globals:
     Timeout: 15
     Environment:
       Variables:
-        DB_SCHEMA: rutastic
-        DB_USER: root
+        DB_USER: master
         DB_USER_PWD: adminadmin
         READ_ENDPOINT: pablogpz.asuscomm.com
         WRITE_ENDPOINT: pablogpz.asuscomm.com
         PORT: 33060
+        DB_SCHEMA: rutastic
         CORS_ALLOWED_ORIGINS: '*'
+    VpcConfig:
+      SubnetIds: !Ref VPCSubnetsIds
+      SecurityGroupIds:
+        - !Ref SecurityGroupId
     CodeUri: rutastic-api
 Resources:
   CognitoUserPool:
