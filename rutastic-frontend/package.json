@@ -7,11 +7,10 @@
     "build": "webpack"
   },
   "dependencies": {
-    "@aws-amplify/core": "^3.3.13",
-    "@aws-amplify/auth": "^3.3.13",
+    "@aws-amplify/core": "^5.3.1",
+    "@aws-amplify/auth": "^5.3.7",
     "angular": "1.6.9",
     "angular-route": "1.6.9",
-    "aws-sdk": "2.820.0",
     "moment": "^2.29.4"
   },
   "devDependencies": {

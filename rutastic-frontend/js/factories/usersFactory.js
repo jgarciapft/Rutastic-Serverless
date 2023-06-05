@@ -1,4 +1,3 @@
-import AWS from "aws-sdk";
 import {Auth} from "@aws-amplify/auth";
 
 import {config} from "../app";
@@ -11,16 +10,14 @@ angular.module('Rutastic')
 
         let restBaseUrl = `${config.aws.apiGateway.endpoint}/usuarios`;
 
-        let cognitoIDP = new AWS.CognitoIdentityServiceProvider({region: 'eu-west-1'})
-
         // FACTORY PROPERTIES
 
         let usersFactory = {
             observerCallbacks: [],
             loggedCognitoUser: undefined, // Holds the logged user within this app
-            // Enforceables password policies as configured in the Amazon Cognito User Pool
+            // Enforceable password policies as configured in the Amazon Cognito User Pool
             passwordPolicies: {
-                minLenght: 8,
+                minLength: 8,
                 mustContainNumber: true,
                 mustContainUppercase: true,
                 mustContainLowercase: true,
@@ -44,7 +41,7 @@ angular.module('Rutastic')
 
         /**
          * Retrieve a list of the users who are authors of the top monthly routes, ordered by descending number
-         * of top monthly routes. For an user to be taken into account at least one of their routes need to have
+         * of top monthly routes. For a user to be taken into account at least one of their routes need to have
          * received a kudo rating
          *
          * @return {HttpPromise|Promise|PromiseLike<T>|Promise<T>} A promise which resolves to an array of the top users
@@ -161,26 +158,21 @@ angular.module('Rutastic')
          * @return A promise
          */
         usersFactory.deleteSelf = function () {
-            return Auth.currentSession()
-                .then(session => {
+            return usersFactory.getJWTIdToken().then(idToken => {
+                Auth.deleteUser()
+                    .then(_ => {
+                        // Delete ourselves from the REST API
+                        $http.delete(`${restBaseUrl}/${usersFactory.loggedCognitoUser.username}`,
+                            {headers: {Auth: idToken}});
 
-                    // Delete ourselves from the REST API
-                    $http.delete(`${restBaseUrl}/${usersFactory.loggedCognitoUser.username}`,
-                        {headers: {Auth: session.idToken.jwtToken}});
-
-                    // Delete ourselves from the Cognito User Pool
-                    let params = {
-                        AccessToken: session.accessToken.jwtToken
-                    }
-                    cognitoIDP.deleteUser(params, function (err, data) {
-                        if (err) console.log(err, err.stack); // an error occurred
+                        usersFactory.loggedCognitoUser = undefined;
+                        notifyUserObservers();
+                    })
+                    .catch(reason => {
+                        console.log(reason); // an error occurred
                     });
-
-                    usersFactory.doSignOut();
-
-                    notifyUserObservers();
-                });
-        }
+            })
+        };
 
         /**
          * Checks a password against the current enforceable password policies. If the password is invalid it returns
@@ -190,7 +182,7 @@ angular.module('Rutastic')
          * @return {string|number} 0 if the password is valid, a reason of why it's invalid otherwise
          */
         usersFactory.checkPasswordAgainstPolicies = function (password) {
-            if (password.length < usersFactory.passwordPolicies.minLenght) {
+            if (password.length < usersFactory.passwordPolicies.minLength) {
                 return 'La contraseña debe tener al menos 8 caracteres';
             } else if (usersFactory.passwordPolicies.mustContainLowercase && password.search(/[a-z]+/) === -1) {
                 return 'La contraseña debe contener minúsculas';
