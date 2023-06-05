@@ -1,4 +1,5 @@
 import {config} from "../app";
+import {resolveRoute, resolveRouteCollection} from "../model/resolveRoute";
 
 angular.module('Rutastic')
     .factory('routesFactory', ['$http', 'usersFactory', function ($http, usersFactory) {
@@ -23,7 +24,7 @@ angular.module('Rutastic')
         routesFactory.getRoute = function (routeId) {
             return $http
                 .get(`${restBaseUrl}/${routeId}`)
-                .then(response => response);
+                .then(response => ({...response, data: resolveRoute(response.data)}));
         }
 
         /**
@@ -35,7 +36,7 @@ angular.module('Rutastic')
         routesFactory.getTop5RoutesOfTheWeek = function () {
             return $http
                 .get(`${restBaseUrl}/estadisticas?e=topRutasSemanal`)
-                .then(response => response.data);
+                .then(response => resolveRouteCollection(response.data));
         }
 
         /**
@@ -47,7 +48,7 @@ angular.module('Rutastic')
         routesFactory.getTop5RoutesOfTheMonth = function () {
             return $http
                 .get(`${restBaseUrl}/estadisticas?e=topRutasMensual`)
-                .then(response => response.data);
+                .then(response => resolveRouteCollection(response.data));
         }
 
         /**
@@ -72,7 +73,7 @@ angular.module('Rutastic')
 
             return $http
                 .get(`${restBaseUrl}/${routeId}/similares?por=${similarity}${extraQueryBits}`)
-                .then(response => response.data);
+                .then(response => resolveRouteCollection(response.data));
         }
 
         /**

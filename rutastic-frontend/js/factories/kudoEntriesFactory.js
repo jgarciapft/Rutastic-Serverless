@@ -1,4 +1,5 @@
 import {config} from "../app";
+import {resolveKudoEntry, resolveKudoEntryCollection} from "../model/resolveKudoEntry";
 
 angular.module('Rutastic')
     .factory('kudoEntriesFactory', ['$http', 'usersFactory', function ($http, usersFactory) {
@@ -9,7 +10,7 @@ angular.module('Rutastic')
 
         let kudoEntriesFactory = {
             /**
-             * Retrieve all kudo entries associated with an user
+             * Retrieve all kudo entries associated with a user
              *
              * @param username Username of the user
              * @return {HttpPromise|Promise|PromiseLike<T>|Promise<T>} A promise which resolves to the array of
@@ -19,7 +20,7 @@ angular.module('Rutastic')
                 return usersFactory.getJWTIdToken()
                     .then(jwtIDToken => $http
                         .get(`${restBaseUrl}/${username}`, {headers: {Auth: jwtIDToken}}))
-                    .then(response => response.data);
+                    .then(response => resolveKudoEntryCollection(response.data));
             },
             /**
              * Retrieve all kudo entries associated for the logged user, if any
@@ -42,7 +43,7 @@ angular.module('Rutastic')
                 return usersFactory.getJWTIdToken()
                     .then(jwtIDToken => $http
                         .get(`${restBaseUrl}/${username}/${routeId}`, {headers: {Auth: jwtIDToken}}))
-                    .then(response => response.data);
+                    .then(response => resolveKudoEntry(response.data));
             }
         };
 

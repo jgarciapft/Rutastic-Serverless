@@ -11,7 +11,8 @@
     "@aws-amplify/auth": "^3.3.13",
     "angular": "1.6.9",
     "angular-route": "1.6.9",
-    "aws-sdk": "2.820.0"
+    "aws-sdk": "2.820.0",
+    "moment": "^2.29.4"
   },
   "devDependencies": {
     "webpack": "^4.17.1",

@@ -1,14 +1,17 @@
 import angular from 'angular';
 import ngRoute from 'angular-route';
 import Amplify from '@aws-amplify/core';
+import moment from "moment";
+
+moment.locale('es');
 
 // Global SPA configuration
 export const config = {
     aws: {
         cognito: {
             region: 'us-east-1',
-            userPoolId: 'us-east-1_EY2mrGeCx',
-            userPoolWebClientId: '7t2anqhpst2itlr23al49g3ll1'
+            userPoolId: 'us-east-1_Q6c04CQrJ',
+            userPoolWebClientId: '5hipro45ri2j3c7l2drniqi0l6'
         },
         apiGateway: {
             endpoint: 'https://1haxumupa7.execute-api.us-east-1.amazonaws.com/dev'

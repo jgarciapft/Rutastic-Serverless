@@ -1,4 +1,5 @@
 import {config} from "../app";
+import {resolveRouteCollection} from "../model/resolveRoute";
 
 angular.module('Rutastic')
     .factory('routeQueryFactory',
@@ -39,7 +40,7 @@ angular.module('Rutastic')
                     return $http
                         .get(`${restBaseUrl}?${$httpParamSerializer(query)}`)
                         .then(response => {
-                            routeQueryFactory.filteredRoutes = response.data;
+                            routeQueryFactory.filteredRoutes = resolveRouteCollection(response.data);
                             console.log(`Retrieved (${routeQueryFactory.filteredRoutes.length}) routes from route query`);
                         })
                         // Retrieve top users and routes
