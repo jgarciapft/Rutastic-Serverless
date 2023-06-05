@@ -17,6 +17,9 @@ Parameters:
   LambdaExecutionRoleArn:
     Type: String
     Description: ARN del rol asociado a las funciones Lambda
+  GitHubPersonalAccessToken:
+    Type: String
+    Description: Token de acceso personal de GitHub con acceso al repositorio de Rutastic
 Globals:
   Function:
     Runtime: java11
@@ -34,7 +37,7 @@ Globals:
         WRITE_ENDPOINT: !GetAtt AuroraDBServerlessCluster.Endpoint.Address
         PORT: !GetAtt AuroraDBServerlessCluster.Endpoint.Port
         DB_SCHEMA: rutastic
-        CORS_ALLOWED_ORIGINS: '*'
+        CORS_ALLOWED_ORIGINS: !Sub 'https://${AmplifyProductionBranch.BranchName}.${AmplifyHosting.DefaultDomain}'
     VpcConfig:
       SubnetIds: !Ref VPCSubnetsIds
       SecurityGroupIds:
@@ -79,8 +82,8 @@ Resources:
             Principal:
               AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'
             Action:
-              - "kms:*"
-            Resource: "*"
+              - 'kms:*'
+            Resource: '*'
 
   DBServerlessInstance1:
     Type: AWS::RDS::DBInstance
@@ -370,6 +373,27 @@ Resources:
             RestApiId: !Ref ApiGatewayRestApi
             Method: DELETE
             Path: /rutas/{proxy+}
+
+  AmplifyHosting:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: RutasticSPA
+      Platform: WEB
+      AccessToken: !Ref GitHubPersonalAccessToken
+      Repository: https://github.com/jgarciapft/Rutastic-Serverless
+      CustomRules:
+        - Source: '/<*>'
+          Target: '/index.html'
+          Status: '404-200'
+
+  AmplifyProductionBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId: !GetAtt AmplifyHosting.AppId
+      BranchName: main
+      EnableAutoBuild: true
+      Framework: WEBPACK
+      Stage: PRODUCTION
 Outputs:
   AuroraClusterSecretArn:
     Value: !GetAtt AuroraDBServerlessCluster.MasterUserSecret.SecretArn
@@ -383,3 +407,5 @@ Outputs:
     Value: !Ref CognitoUserPoolClient
   RutasticAPIEndpoint:
     Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${RutasticAPIStageName}"
+  ProductionURL:
+    Value: !Sub 'https://${AmplifyProductionBranch.BranchName}.${AmplifyHosting.DefaultDomain}'

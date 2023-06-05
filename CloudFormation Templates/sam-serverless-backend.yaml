@@ -22,7 +22,7 @@ Globals:
     Timeout: 15
     Environment:
       Variables:
-        DB_USER: master
+        DB_USER: root
         DB_USER_PWD: adminadmin
         READ_ENDPOINT: pablogpz.asuscomm.com
         WRITE_ENDPOINT: pablogpz.asuscomm.com
