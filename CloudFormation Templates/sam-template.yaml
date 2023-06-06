@@ -25,12 +25,11 @@ Globals:
     Timeout: 15
     Environment:
       Variables:
-        DB_USER: !Sub '{{resolve:secretsmanager:${AuroraDBServerlessCluster.MasterUserSecret.SecretArn}:SecretString:username}}'
-        DB_USER_PWD: !Sub '{{resolve:secretsmanager:${AuroraDBServerlessCluster.MasterUserSecret.SecretArn}:SecretString:password}}'
         READ_ENDPOINT: !GetAtt AuroraDBServerlessCluster.ReadEndpoint.Address
         WRITE_ENDPOINT: !GetAtt AuroraDBServerlessCluster.Endpoint.Address
         PORT: !GetAtt AuroraDBServerlessCluster.Endpoint.Port
         DB_SCHEMA: rutastic
+        DB_CREDENTIALS_SECRET_ID: !GetAtt AuroraDBCluster.MasterUserSecret.SecretArn
         CORS_ALLOWED_ORIGINS: !Sub 'https://${AmplifyProductionBranch.BranchName}.${AmplifyHosting.DefaultDomain}'
     VpcConfig:
       SubnetIds:
