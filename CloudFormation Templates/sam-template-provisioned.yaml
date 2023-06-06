@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: Rutastic WebApp with provisioned capacity (testing only)
+Description: Rutastic WebApp deployment template - Provisioned capacity [for testing purposes]
 Parameters:
   VPCId:
     Type: AWS::EC2::VPC::Id
@@ -11,12 +11,12 @@ Parameters:
   DBDevEndpointSourceCIDR:
     Type: String
     Description: CIDR de la red desde la que se permitirá el acceso al endpoint del desarrollador
-  RutasticAPIStageName:
-    Type: String
-    Description: Nombre de la etapa en la que se desplegará RutasticAPI
   LambdaExecutionRoleArn:
     Type: String
     Description: ARN del rol asociado a las funciones Lambda
+  RutasticAPIStageName:
+    Type: String
+    Description: Nombre de la etapa en la que se desplegará RutasticAPI
   GitHubPersonalAccessToken:
     Type: String
     Description: Token de acceso personal de GitHub con acceso al repositorio de Rutastic
