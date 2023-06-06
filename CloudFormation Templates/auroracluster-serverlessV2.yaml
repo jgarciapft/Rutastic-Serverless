@@ -1,15 +1,11 @@
-#file: noinspection YamlFormatViolation
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   VPCId:
     Type: AWS::EC2::VPC::Id
-    Description: El ID de la VPC en la que alojar el clúster Aurora (RutasticDB)
   VPCSubnetsIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: Listado de las subredes en la VPC en la que se aloja el clúster Aurora (RutasticDB)
   DBDevEndpointSourceCIDR:
     Type: String
-    Description: CIDR de la red desde la que se permitirá el acceso al endpoint del desarrollador
 Resources:
   AuroraDBServerlessCluster:
     Type: AWS::RDS::DBCluster

@@ -1,5 +1,7 @@
 package aws.lambda.handlers.routes;
 
+import aws.model.RDSManagedCredentials;
+import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -20,17 +22,22 @@ import static aws.lambda.HTTPStatusCodes.*;
 public class RoutesPOST implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private static final String THIS_RESOURCE = "/rutas";
+    private static final SecretCache dbCredentialsSecretCache = new SecretCache();
     private static final MySQLConnectionManager jdbcManager = MySQLConnectionManager.getInstance();
     private static final Gson gson = new Gson();
 
+    // On cold boot set up and create a db connection
     static {
-        // On cold boot set up and create a db connection
+        RDSManagedCredentials dbCredentials = gson.fromJson(
+                dbCredentialsSecretCache.getSecretString(System.getenv("DB_CREDENTIALS_SECRET_ID")),
+                RDSManagedCredentials.class);
+
         jdbcManager.setUpAndConnect(
                 System.getenv("READ_ENDPOINT"),
                 System.getenv("WRITE_ENDPOINT"),
                 Integer.parseInt(System.getenv("PORT")),
-                System.getenv("DB_USER"),
-                System.getenv("DB_USER_PWD"),
+                dbCredentials.getUsername(),
+                dbCredentials.getPassword(),
                 System.getenv("DB_SCHEMA"));
     }
 

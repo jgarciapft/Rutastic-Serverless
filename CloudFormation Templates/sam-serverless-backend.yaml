@@ -3,10 +3,8 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   RutasticAPIStageName:
     Type: String
-    Description: Nombre de la etapa en la que se desplegará RutasticAPI
   LambdaExecutionRoleArn:
     Type: String
-    Description: ARN del rol asociado a las funciones Lambda
   VPCSubnetsIds:
     Type: List<AWS::EC2::Subnet::Id>
   SecurityGroupId:

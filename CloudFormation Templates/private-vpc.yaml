@@ -1,0 +1,126 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  DBDevEndpointSourceCIDR:
+    Type: String
+Resources:
+  PrivateVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.31.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: rutastic-infra
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref PrivateVPC
+      AvailabilityZone: !Sub ${AWS::Region}a
+      CidrBlock: 172.31.2.0/24
+      MapPublicIpOnLaunch: false
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref PrivateVPC
+      AvailabilityZone: !Sub ${AWS::Region}b
+      CidrBlock: 172.31.3.0/24
+      MapPublicIpOnLaunch: false
+
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref PrivateVPC
+      AvailabilityZone: !Sub ${AWS::Region}c
+      CidrBlock: 172.31.4.0/24
+      MapPublicIpOnLaunch: false
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref PrivateVPC
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref PrivateVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  InternetRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref RouteTable
+
+  RouteTableAssociationToSubnet1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref PrivateSubnet1
+
+  RouteTableAssociationToSubnet2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref PrivateSubnet2
+
+  RouteTableAssociationToSubnet3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref PrivateSubnet3
+
+  SecretsManagerVPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.secretsmanager
+      VpcId: !Ref PrivateVPC
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet3
+      VpcEndpointType: Interface
+      SecurityGroupIds:
+        - !Ref DBSecurityGroupByEC2SG
+      PrivateDnsEnabled: true
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action:
+              - "secretsmanager:*"
+            Resource:
+              - "*"
+
+  DBSecurityGroupByEC2SG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: RutasticDB-AuroraCluster-SG
+      GroupDescription: Security group for RutasticDB resource
+      VpcId: !Ref PrivateVPC
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+
+  DBSecurityGroupByEC2SGIngressRuleAllowOwnGroup:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DBSecurityGroupByEC2SG
+      SourceSecurityGroupId: !Ref DBSecurityGroupByEC2SG
+      IpProtocol: -1
+
+  DBSecurityGroupByEC2SGIngressRuleAllowDBTraffic:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DBSecurityGroupByEC2SG
+      CidrIp: !Ref DBDevEndpointSourceCIDR
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
