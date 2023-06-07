@@ -13,6 +13,8 @@ import resources.routes.GetRankedRoutes;
 import resources.routes.model.GetRankedRoutesRequest;
 import resources.routes.model.GetRankedRoutesResponse;
 
+import java.util.HashMap;
+
 import static aws.lambda.HTTPStatusCodes.BAD_REQUEST;
 import static aws.lambda.HTTPStatusCodes.OK;
 
@@ -39,8 +41,14 @@ public class RouteStatisticsGET implements RequestHandler<APIGatewayProxyRequest
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
-        return handleRequestDelegate(event, context)
-                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+        APIGatewayProxyResponseEvent response = handleRequestDelegate(event, context);
+
+        HashMap<String, String> headers = new HashMap<>();
+
+        if (response.getHeaders() != null) headers.putAll(response.getHeaders());
+        headers.putAll(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+
+        return response.withHeaders(headers);
     }
 
     private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {

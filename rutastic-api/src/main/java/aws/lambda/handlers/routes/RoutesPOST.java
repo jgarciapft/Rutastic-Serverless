@@ -15,6 +15,7 @@ import resources.routes.CreateRoute;
 import resources.routes.model.CreateRouteRequest;
 import resources.routes.model.CreateRouteResponse;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static aws.lambda.HTTPStatusCodes.*;
@@ -43,8 +44,14 @@ public class RoutesPOST implements RequestHandler<APIGatewayProxyRequestEvent, A
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
-        return handleRequestDelegate(event, context)
-                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+        APIGatewayProxyResponseEvent response = handleRequestDelegate(event, context);
+
+        HashMap<String, String> headers = new HashMap<>();
+
+        if (response.getHeaders() != null) headers.putAll(response.getHeaders());
+        headers.putAll(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+
+        return response.withHeaders(headers);
     }
 
     private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
@@ -57,13 +64,13 @@ public class RoutesPOST implements RequestHandler<APIGatewayProxyRequestEvent, A
 
         if (response.flagged(CreateRouteResponse.Flags.ERROR_INVALID_ROUTE))
             return new APIGatewayProxyResponseEvent()
-                .withStatusCode(BAD_REQUEST)
-                .withBody(response.getFlagMessage(CreateRouteResponse.Flags.ERROR_INVALID_ROUTE));
+                    .withStatusCode(BAD_REQUEST)
+                    .withBody(response.getFlagMessage(CreateRouteResponse.Flags.ERROR_INVALID_ROUTE));
 
         if (response.flagged(CreateRouteResponse.Flags.ERROR_SAVING_ROUTE))
             return new APIGatewayProxyResponseEvent()
-                .withStatusCode(INTERNAL_SERVER_ERROR)
-                .withBody(response.getFlagMessage(CreateRouteResponse.Flags.ERROR_SAVING_ROUTE));
+                    .withStatusCode(INTERNAL_SERVER_ERROR)
+                    .withBody(response.getFlagMessage(CreateRouteResponse.Flags.ERROR_SAVING_ROUTE));
 
         return new APIGatewayProxyResponseEvent()
                 .withStatusCode(CREATED)

@@ -1,18 +1,19 @@
 package aws.lambda.handlers.routeCategories;
 
 import aws.model.RDSManagedCredentials;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.google.gson.Gson;
 import helper.CORSConfiguration;
 import helper.MySQLConnectionManager;
 import resources.routeCategories.GetAllRouteCategories;
 import resources.routeCategories.model.GetAllRouteCategoriesResponse;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static aws.lambda.HTTPStatusCodes.NO_CONTENT;
 import static aws.lambda.HTTPStatusCodes.OK;
@@ -40,8 +41,14 @@ public class RouteCategoriesGET implements RequestHandler<APIGatewayProxyRequest
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
-        return handleRequestDelegate(event, context)
-                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+        APIGatewayProxyResponseEvent response = handleRequestDelegate(event, context);
+
+        HashMap<String, String> headers = new HashMap<>();
+
+        if (response.getHeaders() != null) headers.putAll(response.getHeaders());
+        headers.putAll(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+
+        return response.withHeaders(headers);
     }
 
     private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {

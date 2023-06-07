@@ -14,6 +14,7 @@ import resources.users.DeleteUser;
 import resources.users.model.DeleteUserRequest;
 import resources.users.model.DeleteUserResponse;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static aws.lambda.HTTPStatusCodes.*;
@@ -41,8 +42,14 @@ public class UserProxyDELETE implements RequestHandler<APIGatewayProxyRequestEve
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
-        return handleRequestDelegate(event, context)
-                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+        APIGatewayProxyResponseEvent response = handleRequestDelegate(event, context);
+
+        HashMap<String, String> headers = new HashMap<>();
+
+        if (response.getHeaders() != null) headers.putAll(response.getHeaders());
+        headers.putAll(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+
+        return response.withHeaders(headers);
     }
 
     private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {

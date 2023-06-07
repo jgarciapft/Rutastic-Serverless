@@ -15,6 +15,7 @@ import resources.users.model.GetAllUsersResponse;
 import resources.users.model.GetUserStatisticsRequest;
 import resources.users.model.GetUserStatisticsResponse;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static aws.lambda.HTTPStatusCodes.*;
@@ -42,8 +43,14 @@ public class UsersGET implements RequestHandler<APIGatewayProxyRequestEvent, API
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
-        return handleRequestDelegate(event, context)
-                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+        APIGatewayProxyResponseEvent response = handleRequestDelegate(event, context);
+
+        HashMap<String, String> headers = new HashMap<>();
+
+        if (response.getHeaders() != null) headers.putAll(response.getHeaders());
+        headers.putAll(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+
+        return response.withHeaders(headers);
     }
 
     private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {

@@ -47,8 +47,14 @@ public class RouteProxyGET implements RequestHandler<APIGatewayProxyRequestEvent
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
-        return handleRequestDelegate(event, context)
-                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+        APIGatewayProxyResponseEvent response = handleRequestDelegate(event, context);
+
+        HashMap<String, String> headers = new HashMap<>();
+
+        if (response.getHeaders() != null) headers.putAll(response.getHeaders());
+        headers.putAll(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+
+        return response.withHeaders(headers);
     }
 
     private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
@@ -128,10 +134,10 @@ public class RouteProxyGET implements RequestHandler<APIGatewayProxyRequestEvent
         if (distanceDeltaSource != null) {
             if (TypeUtils.isANumber(distanceDeltaSource))
                 request.setDistanceDelta(new RequestParameter<>(Integer.parseInt(distanceDeltaSource)));
-             else
-                 return new APIGatewayProxyResponseEvent()
-                         .withStatusCode(BAD_REQUEST)
-                         .withBody("El parámetro (deltaDistancia) no es un número");
+            else
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(BAD_REQUEST)
+                        .withBody("El parámetro (deltaDistancia) no es un número");
         }
 
         GetRelatedRoutesResponse response = GetRelatedRoutes.run(request);

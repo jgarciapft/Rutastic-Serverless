@@ -16,7 +16,7 @@ CREATE TABLE routes
     skill_level     VARCHAR(15)  NOT NULL,
     blocked         NUMERIC(1),
 
-    FOREIGN KEY (created_by_user) REFERENCES users (username) ON DELETE CASCADE
+    FOREIGN KEY (created_by_user) REFERENCES users (username) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- Table to store each possible category for a route

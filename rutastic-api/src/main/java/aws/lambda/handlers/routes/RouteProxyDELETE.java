@@ -14,6 +14,7 @@ import resources.routes.DeleteRoute;
 import resources.routes.model.DeleteRouteRequest;
 import resources.routes.model.DeleteRouteResponse;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static aws.lambda.HTTPStatusCodes.*;
@@ -41,8 +42,14 @@ public class RouteProxyDELETE implements RequestHandler<APIGatewayProxyRequestEv
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
-        return handleRequestDelegate(event, context)
-                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+        APIGatewayProxyResponseEvent response = handleRequestDelegate(event, context);
+
+        HashMap<String, String> headers = new HashMap<>();
+
+        if (response.getHeaders() != null) headers.putAll(response.getHeaders());
+        headers.putAll(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+
+        return response.withHeaders(headers);
     }
 
     private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
@@ -59,8 +66,8 @@ public class RouteProxyDELETE implements RequestHandler<APIGatewayProxyRequestEv
 
         if (response.flagged(DeleteRouteResponse.Flags.ERROR_ROUTE_NOT_FOUND))
             return new APIGatewayProxyResponseEvent()
-                .withStatusCode(NOT_FOUND)
-                .withBody(response.getFlagMessage(DeleteRouteResponse.Flags.ERROR_ROUTE_NOT_FOUND));
+                    .withStatusCode(NOT_FOUND)
+                    .withBody(response.getFlagMessage(DeleteRouteResponse.Flags.ERROR_ROUTE_NOT_FOUND));
 
 
         if (response.flagged(DeleteRouteResponse.Flags.ERROR_UNAUTHORIZED))
@@ -68,8 +75,8 @@ public class RouteProxyDELETE implements RequestHandler<APIGatewayProxyRequestEv
 
         if (response.flagged(DeleteRouteResponse.Flags.ERROR_UNEXPECTED))
             return new APIGatewayProxyResponseEvent()
-                .withStatusCode(INTERNAL_SERVER_ERROR)
-                .withBody(response.getFlagMessage(DeleteRouteResponse.Flags.ERROR_UNEXPECTED));
+                    .withStatusCode(INTERNAL_SERVER_ERROR)
+                    .withBody(response.getFlagMessage(DeleteRouteResponse.Flags.ERROR_UNEXPECTED));
 
         return new APIGatewayProxyResponseEvent().withStatusCode(NO_CONTENT);
     }

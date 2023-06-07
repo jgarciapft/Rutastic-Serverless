@@ -9,6 +9,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.google.gson.Gson;
 import helper.CORSConfiguration;
 import helper.MySQLConnectionManager;
+import model.validators.UserValidation;
 import resources.kudoEntries.GetUserKudoEntries;
 import resources.kudoEntries.GetUserKudoEntriesForRoute;
 import resources.kudoEntries.model.GetUserKudoEntriesForRouteRequest;
@@ -16,8 +17,8 @@ import resources.kudoEntries.model.GetUserKudoEntriesForRouteResponse;
 import resources.kudoEntries.model.GetUserKudoEntriesRequest;
 import resources.kudoEntries.model.GetUserKudoEntriesResponse;
 import resources.model.UserClaimedIdentity;
-import model.validators.UserValidation;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static aws.lambda.HTTPStatusCodes.*;
@@ -45,8 +46,14 @@ public class KudoEntriesUserProxyGET implements RequestHandler<APIGatewayProxyRe
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
-        return handleRequestDelegate(event, context)
-                .withHeaders(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+        APIGatewayProxyResponseEvent response = handleRequestDelegate(event, context);
+
+        HashMap<String, String> headers = new HashMap<>();
+
+        if (response.getHeaders() != null) headers.putAll(response.getHeaders());
+        headers.putAll(CORSConfiguration.getCORSHeadersMap(System.getenv("CORS_ALLOWED_ORIGINS")));
+
+        return response.withHeaders(headers);
     }
 
     private APIGatewayProxyResponseEvent handleRequestDelegate(APIGatewayProxyRequestEvent event, Context context) {
