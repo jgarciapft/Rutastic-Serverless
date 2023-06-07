@@ -5,6 +5,8 @@ export function resolveRouteCollection(apiRouteCollection) {
 }
 
 export function resolveRoute(apiRoute) {
+    if (apiRoute === null) return null;
+
     return {
         id: apiRoute.id,
         createdByUser: apiRoute.createdByUser,

@@ -128,6 +128,19 @@ angular.module('Rutastic')
                             .updateKudoRating(routeDetailsVM.route.id, newRating)
                             .then(function (status) {
                                 routeDetailsVM.functions.reflectRouteChange();
+
+                                const currentEntry = routeQueryFactory.kudoEntriesModMap[$routeParams.ID];
+
+                                if (currentEntry === undefined) {
+                                    routeQueryFactory.kudoEntriesModMap[$routeParams.ID] = newRating;
+                                } else {
+                                    if (currentEntry === newRating) {
+                                        delete routeQueryFactory.kudoEntriesModMap[$routeParams.ID];
+                                    } else {
+                                        routeQueryFactory.kudoEntriesModMap[$routeParams.ID] = newRating;
+                                    }
+                                }
+
                                 console.log(`Updated kudo rating (${newRating}) | Status: ${status}`);
                             }, function (status) {
                                 alert('No se pudo cambiar la puntuación de la ruta. Pruebe más tarde');

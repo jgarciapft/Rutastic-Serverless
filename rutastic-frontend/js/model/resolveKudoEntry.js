@@ -5,9 +5,11 @@ export function resolveKudoEntryCollection(apiKudoEntryCollection) {
 }
 
 export function resolveKudoEntry(apiKudoEntry) {
+    if (apiKudoEntry === null) return null;
+
     return {
-        username: apiKudoEntry.username,
-        routeId: apiKudoEntry.routeId,
+        user: apiKudoEntry.user,
+        route: apiKudoEntry.route,
         modifier: apiKudoEntry.modifier,
         date: formatUTCTimeToLocalTime(apiKudoEntry.submissionDate)
     };
