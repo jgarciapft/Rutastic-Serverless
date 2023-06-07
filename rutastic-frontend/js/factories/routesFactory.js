@@ -90,7 +90,7 @@ angular.module('Rutastic')
                     .then(response => {
                         // Retrieve from the location header the ID of the newly created route
 
-                        let locationHeaderSplit = response.headers(['location']).split('/');
+                        let locationHeaderSplit = response.headers('location').split('/');
                         response.routeId = locationHeaderSplit[locationHeaderSplit.length - 1]; // Get last entry
 
                         return response;

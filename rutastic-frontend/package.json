@@ -11,6 +11,7 @@
     "@aws-amplify/auth": "^5.3.7",
     "angular": "1.6.9",
     "angular-route": "1.6.9",
+    "async-es": "^3.2.4",
     "moment": "^2.29.4"
   },
   "devDependencies": {

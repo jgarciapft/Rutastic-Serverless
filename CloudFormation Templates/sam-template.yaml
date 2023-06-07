@@ -497,7 +497,7 @@ Resources:
       AppId: !GetAtt AmplifyHosting.AppId
       BranchName: main
       EnableAutoBuild: true
-      Framework: WEBPACK
+      Framework: Webpack
       Stage: PRODUCTION
 Outputs:
   AuroraClusterSecretArn:

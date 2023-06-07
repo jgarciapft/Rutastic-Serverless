@@ -17,7 +17,8 @@ public class CORSConfiguration {
 
         return Map.of(
                 "Access-Control-Allow-Origin", String.format("%s", allowedOrigins),
-                "Access-Control-Allow-Headers", String.format("%s", allowedHeaders)
+                "Access-Control-Allow-Headers", String.format("%s", allowedHeaders),
+                "Access-Control-Expose-Headers", "*"
         );
     }
 }

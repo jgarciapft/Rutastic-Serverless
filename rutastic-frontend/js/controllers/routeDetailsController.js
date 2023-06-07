@@ -1,3 +1,5 @@
+import {retry} from "async-es";
+
 angular.module('Rutastic')
     .controller('routeDetailsController',
         ['$routeParams', '$location', '$scope', 'routesFactory', 'usersFactory', 'kudoEntriesFactory', 'routeQueryFactory',
@@ -15,6 +17,26 @@ angular.module('Rutastic')
                 routeDetailsVM.currentRelatedRoutesCollection = []
 
                 routeDetailsVM.functions = {
+                    routeRequest: function () {
+                        return routesFactory
+                            .getRoute($routeParams.ID)
+                            .then(function (response) {
+                                routeDetailsVM.route = response.data;
+                                console.log(`Retrieved route with ID (${$routeParams.ID}) | Status: ${response.status}`);
+
+                                // If there's a logged user try retrieving the associated kudo entry
+
+                                if (routeDetailsVM.loggedUser !== undefined)
+                                    routeDetailsVM.functions.readAssociatedKudoEntry();
+                            }, function (response) {
+                                alert('La ruta solicitada no existe');
+                                console.log(`Error retrieving the route with ID (${$routeParams.ID}) | Status: ${response.status}`);
+                            })
+                            .then(function () {
+                                // Retrieve all related routes
+                                routeDetailsVM.functions.readAllRelatedRoutes();
+                            })
+                    },
                     /**
                      * Try getting the data of the requested route and, if there's a logged user, try retrieving the kudo
                      * entry associated to this user and route
@@ -24,33 +46,24 @@ angular.module('Rutastic')
                         // Check that the requested route ID can be obtained and perform an early validation
 
                         if ($routeParams.ID !== undefined && $routeParams.ID > 0) {
-                            routesFactory
-                                .getRoute($routeParams.ID)
-                                .then(function (response) {
-                                    routeDetailsVM.route = response.data;
-                                    console.log(`Retrieved route with ID (${$routeParams.ID}) | Status: ${response.status}`);
-
-                                    // If there's a logged user try retrieving the associated kudo entry
-
-                                    if (routeDetailsVM.loggedUser !== undefined)
-                                        routeDetailsVM.functions.readAssociatedKudoEntry();
-                                }, function (response) {
-                                    alert('La ruta solicitada no existe');
-                                    console.log(`Error retrieving the route with ID (${$routeParams.ID}) | Status: ${response.status}`);
+                            retry({
+                                times: 3,
+                                interval: (retryCount) => 250 * Math.pow(2, retryCount)
+                            }, routeDetailsVM.functions.routeRequest, (err, _result) => {
+                                if (err) {
+                                    console.log('Error leyendo la ruta, número máximo de reintentos alcanzado')
                                     $location.path('/rutas/FiltrarRutas');
                                     $scope.$apply();
-                                })
-                                .then(function () {
-                                    // Retrieve all related routes
-                                    routeDetailsVM.functions.readAllRelatedRoutes();
-                                })
+                                }
+                            });
                         } else {
                             alert('El identificador de la ruta no es válido');
                             console.log('ERROR READING THE REQUESTED ROUTE. ROUTE PARAMETER (ID) NOT SET OR INVALID');
                             $location.path('/rutas/FiltrarRutas');
                             $scope.$apply();
                         }
-                    },
+                    }
+                    ,
                     /**
                      * Try retrieving the kudo entry associated to the logged user and the requested route. This object
                      * holds if the logged user voted for the requested route
@@ -68,7 +81,8 @@ angular.module('Rutastic')
                                     $scope.$apply();
                                 });
                         }
-                    },
+                    }
+                    ,
                     /**
                      * Attempts to read all related routes to the one stored within this controller
                      */
@@ -102,7 +116,8 @@ angular.module('Rutastic')
                             .then(function (relatedRoutes) {
                                 routeDetailsVM.relatedRoutesByCategories = relatedRoutes;
                             });
-                    },
+                    }
+                    ,
                     /**
                      * Update the blocked state of the requested route
                      */
@@ -116,7 +131,8 @@ angular.module('Rutastic')
                                 alert(`Error al ${routeDetailsVM.route.blocked ? 'desbloquear' : 'bloquear'} la ruta. Puede que intente bloquear una ruta ya bloqueada y viceversa`);
                                 console.log(`Route blocked state update failed for route with ID (${routeDetailsVM.route.id}) | Status: ${status}`);
                             });
-                    },
+                    }
+                    ,
                     /**
                      * Update the kudo rating for the requested route
                      *
@@ -146,7 +162,8 @@ angular.module('Rutastic')
                                 alert('No se pudo cambiar la puntuación de la ruta. Pruebe más tarde');
                                 console.log(`Kudo rating update failed for route with ID (${routeDetailsVM.route.id}) | Status: ${status}`);
                             })
-                    },
+                    }
+                    ,
                     /**
                      * Updates any change made to this route, making them visible to the view, and refresh the current
                      * route query to maintain consistency across views
@@ -154,7 +171,8 @@ angular.module('Rutastic')
                     reflectRouteChange: function () {
                         routeDetailsVM.functions.readRequestedRoute();
                         routeQueryFactory.refreshFilter();
-                    },
+                    }
+                    ,
                     /**
                      * Updates de related routes the user should see depending on selected similarity (distance,
                      * skill level or categories)
@@ -177,4 +195,5 @@ angular.module('Rutastic')
                 // On controller instantiation read the requested route
 
                 routeDetailsVM.functions.readRequestedRoute();
-            }])
+            }
+        ])
