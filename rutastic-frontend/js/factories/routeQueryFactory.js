@@ -31,14 +31,15 @@ angular.module('Rutastic')
                  * @return {HttpPromise|Promise|PromiseLike<T>|Promise<T>} A promise which doesn't resolve to anything
                  */
                 routeQueryFactory.executeFilter = function (query) {
-                    if (query.mostrarMisrutas) {
-                        query.mostrarMisrutas = usersFactory.loggedCognitoUser !== undefined ? usersFactory.loggedCognitoUser.username
-                            : query.mostrarMisrutas;
-                    }
+                    let finalQuery = {...query, mostrarMisrutas: undefined};
+
+                    if (query.mostrarMisrutas)
+                        finalQuery.filtrarUsuario = usersFactory.loggedCognitoUser.username ?? undefined;
+
                     routeQueryFactory.latestRouteQuery = query; // Update the latest executed route query
 
                     return $http
-                        .get(`${restBaseUrl}?${$httpParamSerializer(query)}`)
+                        .get(`${restBaseUrl}?${$httpParamSerializer(finalQuery)}`)
                         .then(response => {
                             routeQueryFactory.filteredRoutes = resolveRouteCollection(response.data);
                             console.log(`Retrieved (${routeQueryFactory.filteredRoutes.length}) routes from route query`);
