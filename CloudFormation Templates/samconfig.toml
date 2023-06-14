@@ -1,8 +1,8 @@
 version = 0.1
 [default.deploy.parameters]
-stack_name = "Rutastic"
+stack_name = "Rutastic-Serverless"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-d9t24k9eyhtf"
-s3_prefix = "Rutastic"
+s3_prefix = "Rutastic-Serverless"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 role_arn = "arn:aws:iam::260124700194:role/LabRole"
