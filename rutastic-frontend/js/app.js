@@ -10,11 +10,11 @@ export const config = {
     aws: {
         cognito: {
             region: 'us-east-1',
-            userPoolId: 'us-east-1_ffvxW3mIq',
-            userPoolWebClientId: '8qntsmch4rhjtphkmr1odel3c'
+            userPoolId: 'us-east-1_bysidwZcx',
+            userPoolWebClientId: '43cbeojkoulh0dvdj0nu2ii4te'
         },
         apiGateway: {
-            endpoint: 'https://hnbhw3nnql.execute-api.us-east-1.amazonaws.com/prod'
+            endpoint: 'https://wihjl4f4zh.execute-api.us-east-1.amazonaws.com/prod'
         }
     }
 }
